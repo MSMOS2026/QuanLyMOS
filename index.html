@@ -469,7 +469,6 @@ async function doLogin(){
 
   const isAdmin=acc.role==='admin';
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
-  localStorage.setItem('mos_user', JSON.stringify(user));
   goTab('hv');
   await loadDK();
   await loadSchedule();
