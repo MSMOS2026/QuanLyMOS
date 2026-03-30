@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Quản Lý Đăng Ký MOS</title>
+<title>Quản Lý Đăng Ký MOS - Hệ Thống Đồng Bộ</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --teal:#00897B;--teal-d:#00695C;--teal-l:#4DB6AC;--teal-bg:#E0F2F1;
@@ -18,1053 +17,305 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g100);color:var(--black);min-height:100vh;font-size:14px}
 
-/* LOGIN */
+/* LOGIN SCREEN */
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%)}
-.login-card{background:#fff;border-radius:20px;padding:44px 40px;width:400px;
-  box-shadow:var(--sh-lg);position:relative;overflow:hidden}
-.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
-  background:linear-gradient(90deg,var(--blue),var(--teal))}
-.ms-logo-big{width:88px;height:88px;background:var(--blue);border-radius:12px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  margin:0 auto 18px;border:3px solid #fff;box-shadow:0 0 0 3px var(--blue)}
-.ms-logo-big .ms-txt{color:#fff;font-size:34px;font-weight:900;font-style:italic;letter-spacing:-2px;line-height:1}
-.ms-logo-big .ms-sub{color:rgba(255,255,255,.82);font-size:5px;font-weight:700;text-align:center;margin-top:3px;letter-spacing:.2px;line-height:1.3}
-.login-title{text-align:center;font-size:22px;font-weight:800;letter-spacing:2px;margin-bottom:4px}
-.login-sub{text-align:center;color:var(--g500);font-size:12px;margin-bottom:26px}
+.login-card{background:#fff;border-radius:20px;padding:40px;width:400px;box-shadow:var(--sh-lg);position:relative;overflow:hidden}
+.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--teal))}
+.ms-logo-big{width:80px;height:80px;background:var(--blue);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 18px;color:#fff;font-size:30px;font-weight:900}
+.login-title{text-align:center;font-size:22px;font-weight:800;margin-bottom:20px}
 .fg{margin-bottom:15px}
-.fg label{display:block;font-size:12px;font-weight:700;color:var(--g700);margin-bottom:6px}
-.fg input,.fg select{width:100%;padding:10px 13px;border:1.5px solid var(--g300);border-radius:var(--r);
-  font-family:inherit;font-size:13px;color:var(--black);background:var(--g100);transition:.2s}
-.fg input:focus,.fg select:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(0,137,123,.1)}
-.btn-login{width:100%;padding:12px;background:linear-gradient(135deg,var(--blue),var(--teal-d));
-  color:#fff;border:none;border-radius:var(--r);font-family:inherit;font-size:14px;font-weight:700;
-  cursor:pointer;transition:.2s;margin-top:4px}
-.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,105,92,.35)}
-.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+.fg label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+.fg input{width:100%;padding:10px;border:1.5px solid var(--g300);border-radius:var(--r);font-family:inherit}
+.btn-login{width:100%;padding:12px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-weight:700;cursor:pointer}
 
-/* APP */
+/* APP LAYOUT */
 #app{display:none;min-height:100vh;flex-direction:column}
-.topbar{height:52px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;
-  padding:0 20px;gap:10px;box-shadow:var(--sh-sm);position:sticky;top:0;z-index:100;flex-shrink:0}
-.topbar-ms{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;
-  align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;font-style:italic}
-.topbar-title{font-size:14px;font-weight:700}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.topbar-user{font-size:12px;color:var(--g500)}
-.btn-sm{padding:5px 12px;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;
-  cursor:pointer;transition:.2s;border:1.5px solid var(--g300);background:transparent;color:var(--g700)}
-.btn-sm:hover{border-color:var(--teal);color:var(--teal)}
-
-/* TABS */
-.tabbar{display:flex;gap:2px;padding:10px 20px 0;background:var(--g200);border-bottom:1px solid var(--g300)}
-.tab{padding:8px 15px;border:none;background:transparent;font-family:inherit;font-size:13px;
-  font-weight:600;color:var(--g500);cursor:pointer;border-radius:8px 8px 0 0;
-  border-bottom:3px solid transparent;transition:.15s;white-space:nowrap}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal);background:#fff}
-.tab:hover:not(.active){color:var(--g700);background:rgba(0,0,0,.04)}
-
-/* PANELS */
-.panel{display:none;padding:16px 20px 24px}
+.topbar{height:52px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 20px;box-shadow:var(--sh-sm)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:15px}
+.tabbar{display:flex;gap:2px;padding:10px 20px 0;background:var(--g200)}
+.tab{padding:10px 15px;border:none;background:transparent;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0}
+.tab.active{background:#fff;color:var(--teal)}
+.panel{display:none;padding:20px}
 .panel.active{display:block}
 
-/* BUTTONS */
-.abar{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.btn{padding:8px 15px;border:none;border-radius:var(--r);font-family:inherit;font-size:12.5px;
-  font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.btn.primary{background:var(--teal);color:#fff}
-.btn.primary:hover{background:var(--teal-d);box-shadow:0 4px 10px rgba(0,105,92,.3)}
-.btn.sec{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
-.btn.sec:hover{background:var(--teal-bg)}
-.btn.danger{background:#fff;color:var(--red);border:1.5px solid var(--red)}
-.btn.danger:hover{background:#FFEBEE}
-.btn.warn{background:#fff;color:var(--orange,#E65100);border:1.5px solid var(--orange,#E65100)}
-.btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
-
-/* SEL BAR */
-.sel-bar{border-radius:var(--r);padding:8px 14px;margin-bottom:10px;font-size:12.5px;
-  font-weight:500;display:flex;align-items:center;gap:8px;min-height:38px}
-.sel-bar.empty{background:var(--g200);border:1.5px solid var(--g300);color:var(--g500)}
-.sel-bar.filled{background:var(--teal-bg);border:1.5px solid var(--teal-l);color:var(--teal-d)}
-
-/* FILTER */
-.fbar{background:#fff;border:1px solid var(--g200);border-radius:var(--r);
-  padding:10px 14px;margin-bottom:10px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.fbar-lbl{font-size:11px;font-weight:800;color:var(--teal-d);text-transform:uppercase;letter-spacing:.5px}
-.fbar input{padding:6px 10px;border:1.5px solid var(--g300);border-radius:8px;font-family:inherit;
-  font-size:12px;background:var(--g100);transition:.15s;width:115px}
-.fbar input:focus{outline:none;border-color:var(--teal);background:#fff}
-.btn-clr{padding:6px 10px;border:1.5px solid var(--g300);border-radius:8px;font-family:inherit;
-  font-size:12px;color:var(--g500);background:transparent;cursor:pointer}
-.btn-clr:hover{border-color:var(--red);color:var(--red)}
-
-/* STATUS */
-.sbar{font-size:12px;color:var(--g500);padding:2px 0 7px;min-height:21px}
-.sbar.ok{color:var(--green)}.sbar.err{color:var(--red)}
-
-/* TABLE */
-.tbl-wrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh-sm);border:1px solid var(--g200);overflow:hidden}
-.tbl-scroll{overflow-x:auto;max-height:calc(100vh - 295px)}
+/* TABLES */
+.tbl-wrap{background:#fff;border-radius:var(--r);border:1px solid var(--g200);overflow:hidden}
+.tbl-scroll{overflow:auto;max-height:calc(100vh - 280px)}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{background:var(--teal);color:#fff;padding:10px 11px;text-align:left;
-  font-weight:700;white-space:nowrap;position:sticky;top:0;z-index:2}
-tbody tr{border-bottom:1px solid var(--g200);cursor:pointer;transition:background .1s}
+thead th{background:var(--teal);color:#fff;padding:12px;text-align:left;position:sticky;top:0;z-index:10}
 tbody tr:hover{background:var(--teal-bg)}
-tbody tr.sel{background:rgba(0,137,123,.12)!important;outline:2px solid var(--teal-l);outline-offset:-2px}
-tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
-.num{color:var(--g500);font-size:11px;text-align:center;width:30px}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
-.by{background:#E8F5E9;color:#2E7D32}.bn{background:#FFF3E0;color:#E65100}
-.tbl-empty{text-align:center;padding:40px 20px;color:var(--g500)}
-.tbl-empty .ico{font-size:34px;margin-bottom:8px}
+tbody tr.sel{background:rgba(0,137,123,0.1);outline:2px solid var(--teal)}
+tbody td{padding:10px;border-bottom:1px solid var(--g200)}
 
-/* SCHEDULE */
-.sch-outer{overflow:auto;max-width:100%}
-.sch-table{border-collapse:collapse;font-size:13px}
-.sch-table th,.sch-table td{border:2px solid var(--g300);padding:0}
-.sch-table .sch-corner{background:var(--g200);width:80px}
-.sch-table .sch-head-cell{background:var(--blue);color:#fff;text-align:center;padding:10px 16px;font-weight:700;font-size:13px;min-width:170px}
-.sch-table .sch-head-date{font-size:11px;font-weight:400;opacity:.85;margin-top:3px}
-.sch-table .sch-time-cell{background:var(--g100);font-weight:700;font-size:13px;
-  text-align:right;padding:0 14px;height:60px;white-space:nowrap;color:var(--g700)}
-.sch-cell-on{background:#2E7D32;height:60px;display:flex;align-items:center;justify-content:center;
-  font-size:22px;font-weight:800;color:#fff;cursor:default}
-.sch-cell-off{background:#111;height:60px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:#444}
-.sch-cell-wrap{padding:0}
+/* BUTTONS */
+.btn{padding:8px 15px;border:none;border-radius:6px;font-weight:600;cursor:pointer;margin-right:5px;display:inline-flex;align-items:center;gap:5px}
+.btn.primary{background:var(--teal);color:#fff}
+.btn.sec{border:1.5px solid var(--teal);color:var(--teal);background:transparent}
+.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:#333;color:#fff;border-radius:8px;display:none;z-index:999}
 
-/* CONFIG */
-.cfg-card{background:#fff;border-radius:var(--r);box-shadow:var(--sh-sm);border:1px solid var(--g200);
-  padding:22px;max-width:540px;margin-bottom:16px}
-.cfg-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
-.cfg-card .sub{font-size:12px;color:var(--g500);margin-bottom:14px}
-.cfg-note{background:var(--teal-bg);border-left:3px solid var(--teal);padding:10px 14px;
-  border-radius:0 8px 8px 0;font-size:11px;color:var(--teal-d);margin-bottom:14px;line-height:1.7}
-.cfg-grp{margin-bottom:13px}
-.cfg-grp label{display:block;font-size:12px;font-weight:700;color:var(--g700);margin-bottom:5px}
-.cfg-grp input{width:100%;padding:9px 12px;border:1.5px solid var(--g300);border-radius:8px;
-  font-family:inherit;font-size:13px;transition:.15s}
-.cfg-grp input:focus{outline:none;border-color:var(--teal)}
-
-/* ACCOUNT TABLE */
-.acc-tbl{width:100%;border-collapse:collapse;font-size:13px}
-.acc-tbl th{background:var(--teal);color:#fff;padding:9px 11px;text-align:left;font-weight:700}
-.acc-tbl td{padding:8px 11px;border-bottom:1px solid var(--g200)}
-.acc-tbl tr:hover td{background:var(--teal-bg)}
-.form-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
-.form-row .fgi{flex:1;min-width:110px}
-.form-row .fgi label{display:block;font-size:11px;font-weight:700;color:var(--g700);margin-bottom:4px}
-.form-row .fgi input,.form-row .fgi select{width:100%;padding:7px 10px;border:1.5px solid var(--g300);
-  border-radius:8px;font-family:inherit;font-size:12px;background:#fff;transition:.15s}
-.form-row .fgi input:focus,.form-row .fgi select:focus{outline:none;border-color:var(--teal)}
-
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
-.overlay.open{display:flex}
-.modal{background:#fff;border-radius:16px;box-shadow:var(--sh-lg);width:min(720px,95vw);
-  max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
-.modal-hdr{padding:15px 20px;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.modal-hdr h3{font-size:14px;font-weight:700}
-.modal-x{width:28px;height:28px;border:none;background:var(--g200);border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
-.modal-x:hover{background:var(--g300)}
-.modal-body{padding:18px 20px;flex:1}
-.modal-foot{padding:12px 20px;border-top:1px solid var(--g200);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
-
-/* TOAST */
-.toast{position:fixed;bottom:18px;right:18px;background:var(--black);color:#fff;
-  padding:10px 16px;border-radius:var(--r);font-size:12.5px;font-weight:500;
-  box-shadow:var(--sh-lg);z-index:400;transform:translateY(60px);opacity:0;
-  transition:.28s ease;pointer-events:none;max-width:340px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ok{background:var(--green)}
-.toast.warn{background:#E65100}
-.toast.err{background:var(--red)}
-
-/* PRINT */
-@media print{
-  body *{visibility:hidden}
-  #phieu-print-area,#phieu-print-area *{visibility:visible}
-  #phieu-print-area{position:fixed;inset:0;background:#fff;z-index:9999;padding:20px}
-  .no-print{display:none!important}
+/* PRINT STYLES */
+@media print {
+    body * { visibility: hidden; }
+    #print-section, #print-section * { visibility: visible; }
+    #print-section { position: absolute; left: 0; top: 0; width: 100%; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ LOGIN ═══ -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="ms-logo-big">
-      <div class="ms-txt">MS</div>
-      <div class="ms-sub">TRUNG TÂM TIN HỌC<br>THỰC HÀNH</div>
-    </div>
-    <div class="login-title">ĐĂNG NHẬP</div>
-    <div class="login-sub">Hệ thống Quản lý Đăng ký Thi MOS</div>
-    <div class="fg"><label>Tài Khoản</label>
-      <input id="inp-u" type="text" placeholder="Nhập tài khoản…" autocomplete="username"/></div>
-    <div class="fg"><label>Mật Khẩu</label>
-      <input id="inp-p" type="password" placeholder="Nhập mật khẩu…" autocomplete="current-password"/></div>
-    <button class="btn-login" onclick="doLogin()">Đăng Nhập</button>
-    <div class="login-err" id="lerr"></div>
+    <div class="ms-logo-big">MS</div>
+    <div class="login-title">HỆ THỐNG QUẢN LÝ MOS</div>
+    <div class="fg"><label>Tài khoản</label><input id="inp-u" type="text" value="admin"/></div>
+    <div class="fg"><label>Mật khẩu</label><input id="inp-p" type="password" value="1234"/></div>
+    <button class="btn-login" onclick="doLogin()">ĐĂNG NHẬP</button>
+    <div id="lerr" style="color:red;font-size:12px;margin-top:10px;text-align:center"></div>
   </div>
 </div>
 
-<!-- ═══ APP ═══ -->
 <div id="app">
   <div class="topbar">
-    <div class="topbar-ms">MS</div>
-    <span class="topbar-title">Quản Lý Đăng Ký MOS</span>
+    <div style="font-weight:800;color:var(--teal)">MS CENTER</div>
     <div class="topbar-right">
-      <span class="topbar-user" id="tuser"></span>
-      <button class="btn-sm" onclick="doLogout()">Đăng xuất</button>
+      <span id="tuser" style="font-weight:600; font-size:12px"></span>
+      <button class="btn-login" style="padding:5px 10px; width:auto; font-size:12px" onclick="doLogout()">Đăng xuất</button>
     </div>
   </div>
-
   <div class="tabbar">
-    <button class="tab active" data-tab="hv">👤 Thông tin học viên</button>
-    <button class="tab" data-tab="dk">📋 Danh sách đăng ký</button>
-    <button class="tab" data-tab="lt">📅 Lịch Thi MOS</button>
-    <button class="tab admin-only" data-tab="acc" style="display:none">👥 Tài khoản</button>
-    <button class="tab admin-only" data-tab="cfg" style="display:none">⚙️ Cấu hình</button>
+    <button class="tab active" data-tab="dk" onclick="goTab('dk')">📋 Danh sách đăng ký</button>
+    <button class="tab" data-tab="hv" onclick="goTab('hv')">👤 Học viên của tôi</button>
+    <button class="tab" data-tab="cfg" onclick="goTab('cfg')">⚙️ Cấu hình</button>
   </div>
 
-  <!-- ── HV: Thông tin học viên ── -->
-  <div class="panel active" id="panel-hv">
-    <div class="abar">
-      <button class="btn primary" onclick="loadDK()">🔄 Refresh</button>
-      <button class="btn sec" id="hv-btn-in"   onclick="doInPhieu()"  disabled>🖨️ In phiếu đăng ký</button>
-      <button class="btn sec" id="hv-btn-copy" onclick="doCopy()"     disabled>📋 Copy tin nhắn</button>
-      <button class="btn sec"                   onclick="goTab('lt')">📅 Lịch Thi MOS</button>
+  <div class="panel active" id="panel-dk">
+    <div style="margin-bottom:15px">
+      <button class="btn primary" onclick="loadDK()">🔄 Tải lại dữ liệu</button>
+      <button id="btn-get" class="btn sec" disabled onclick="dkGetInfo()">📥 Lấy thông tin học viên</button>
     </div>
-    <div class="sel-bar empty" id="hv-sel">💡 Chọn một dòng để thao tác</div>
-    <div class="fbar">
-      <span class="fbar-lbl">Lọc</span>
-      <input id="hv-fd" placeholder="Đợt thi"   oninput="filterHV()"/>
-      <input id="hv-fm" placeholder="Mã HV"     oninput="filterHV()"/>
-      <input id="hv-fn" placeholder="Họ và tên" oninput="filterHV()"/>
-      <input id="hv-ft" placeholder="Ngày thi"  oninput="filterHV()"/>
-      <button class="btn-clr" onclick="clearFlt('hv')">✕ Xóa lọc</button>
-    </div>
-    <div class="sbar" id="hv-st"></div>
     <div class="tbl-wrap"><div class="tbl-scroll">
-      <table><thead><tr>
-        <th>#</th><th>Ngày ĐK</th><th>Đợt thi</th><th>Mã HV</th><th>Họ và tên</th>
-        <th>Số CCCD</th><th>Giới tính</th><th>Ngày sinh</th><th>Số điện thoại</th>
-        <th>Email</th><th>Đã Thi MOS</th><th>Môn Thi</th><th>Phiên bản</th>
-        <th>Ngôn ngữ</th><th>Ngày Thi</th><th>Giờ Thi</th>
-      </tr></thead>
-      <tbody id="hv-body">
-        <tr><td colspan="16"><div class="tbl-empty"><div class="ico">📭</div>
-          <p>Sang tab <b>Danh sách đăng ký</b> → chọn dòng → bấm <b>📥 Lấy Thông Tin</b></p>
-        </div></td></tr>
-      </tbody></table>
+      <table>
+        <thead><tr><th>#</th><th>Ngày ĐK</th><th>Mã HV</th><th>Họ tên</th><th>Môn thi</th><th>Ngày thi</th></tr></thead>
+        <tbody id="dk-body"></tbody>
+      </table>
     </div></div>
   </div>
 
-  <!-- ── DK: Danh sách đăng ký ── -->
-  <div class="panel" id="panel-dk">
-    <div class="abar">
-      <button class="btn primary" onclick="loadDK()">🔄 Refresh</button>
-      <button class="btn sec"    id="dk-btn-lay" onclick="dkLayThongTin()" disabled>📥 Lấy Thông Tin Đăng Ký</button>
-      <button class="btn danger" id="dk-btn-xoa" onclick="dkXoa()"        disabled>🗑️ Xóa thông tin</button>
+  <div class="panel" id="panel-hv">
+    <div style="margin-bottom:15px">
+      <button class="btn primary" onclick="loadHV()">🔄 Làm mới danh sách</button>
+      <button id="btn-print" class="btn sec" disabled onclick="doPrintDirect()">🖨️ In phiếu trực tiếp</button>
     </div>
-    <div class="sel-bar empty" id="dk-sel">💡 Chọn một dòng để thao tác</div>
-    <div class="fbar">
-      <span class="fbar-lbl">Lọc</span>
-      <input id="dk-fd" placeholder="Đợt thi"   oninput="filterDK()"/>
-      <input id="dk-fm" placeholder="Mã HV"     oninput="filterDK()"/>
-      <input id="dk-fn" placeholder="Họ và tên" oninput="filterDK()"/>
-      <input id="dk-ft" placeholder="Ngày thi"  oninput="filterDK()"/>
-      <button class="btn-clr" onclick="clearFlt('dk')">✕ Xóa lọc</button>
-    </div>
-    <div class="sbar" id="dk-st"></div>
     <div class="tbl-wrap"><div class="tbl-scroll">
-      <table><thead><tr>
-        <th>#</th><th>Ngày ĐK</th><th>Đợt thi</th><th>Mã HV</th><th>Họ và tên</th>
-        <th>Số CCCD</th><th>Giới tính</th><th>Ngày sinh</th><th>Số điện thoại</th>
-        <th>Email</th><th>Đã Thi MOS</th><th>Môn Thi</th><th>Phiên bản</th>
-        <th>Ngôn ngữ</th><th>Ngày Thi</th><th>Giờ Thi</th>
-      </tr></thead>
-      <tbody id="dk-body">
-        <tr><td colspan="16"><div class="tbl-empty"><div class="ico">📭</div>
-          <p>Nhấn <b>🔄 Refresh</b> để tải dữ liệu từ Google Sheets</p>
-        </div></td></tr>
-      </tbody></table>
+      <table>
+        <thead><tr><th>#</th><th>Đợt thi</th><th>Mã HV</th><th>Họ tên</th><th>Môn thi</th><th>Trạng thái</th></tr></thead>
+        <tbody id="hv-body"></tbody>
+      </table>
     </div></div>
   </div>
 
-  <!-- ── LT: Lịch Thi ── -->
-  <div class="panel" id="panel-lt">
-    <div class="abar">
-      <button class="btn primary" onclick="loadSchedule()">🔄 Tải lịch thi</button>
-    </div>
-    <div class="sbar" id="lt-st"></div>
-    <div class="sch-outer" id="sch-area"></div>
-  </div>
-
-  <!-- ── ACC: Tài khoản ── -->
-  <div class="panel" id="panel-acc">
-    <div class="cfg-card" style="max-width:620px">
-      <h4>👥 Quản lý tài khoản</h4>
-      <p class="sub">Thêm / Sửa / Xóa tài khoản. Tài khoản <b>admin</b> không thể xóa.</p>
-      <div style="background:var(--g100);border:1px solid var(--g200);border-radius:var(--r);padding:14px 16px;margin-bottom:14px">
-        <div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:10px">➕ Thêm / Cập nhật tài khoản</div>
-        <div class="form-row">
-          <div class="fgi"><label>Tên đăng nhập</label><input id="acc-u" placeholder="username"/></div>
-          <div class="fgi"><label>Mật khẩu</label><input id="acc-p" type="password" placeholder="••••••"/></div>
-          <div class="fgi" style="max-width:100px"><label>Vai trò</label>
-            <select id="acc-r"><option value="user">User</option><option value="admin">Admin</option></select></div>
-          <button class="btn primary" style="align-self:flex-end" onclick="accSave()">💾 Lưu</button>
-        </div>
-      </div>
-      <div class="sbar" id="acc-st"></div>
-      <div class="tbl-wrap"><table class="acc-tbl">
-        <thead><tr><th>#</th><th>Tài khoản</th><th>Vai trò</th><th>Thao tác</th></tr></thead>
-        <tbody id="acc-body"></tbody>
-      </table></div>
-    </div>
-  </div>
-
-  <!-- ── CFG: Cấu hình ── -->
   <div class="panel" id="panel-cfg">
-    <div class="cfg-card">
-      <h4>⚙️ Cấu hình kết nối Google Sheets</h4>
-      <p class="sub">Chỉ cần 1 URL — dùng chung cho tất cả: Danh sách, Lịch thi, Tài khoản.</p>
-      <div class="cfg-note">
-        📌 <b>Hướng dẫn deploy Apps Script:</b><br>
-        1. Mở Google Sheets → Extensions → Apps Script<br>
-        2. Dán toàn bộ nội dung file <b>apps_script.js</b> → Ctrl+S<br>
-        3. Deploy → New deployment → Web App<br>
-        &nbsp;&nbsp;&nbsp;• Execute as: <b>Me</b> &nbsp;|&nbsp; Who has access: <b>Anyone</b><br>
-        4. Copy URL → Dán vào ô bên dưới → Lưu
-      </div>
-      <div class="cfg-grp"><label>Web App URL (dùng cho tất cả sheets)</label>
-        <input id="cfg-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"/></div>
-      <div class="abar">
-        <button class="btn primary" onclick="saveConfig()">💾 Lưu cấu hình</button>
-        <button class="btn sec"     onclick="testConn()">🔌 Test kết nối</button>
-        <button class="btn sec"     onclick="useMock()">🧪 Dữ liệu mẫu</button>
-      </div>
+    <div style="max-width:500px;background:#fff;padding:20px;border-radius:10px; border:1px solid var(--g300)">
+      <h3>Cấu hình hệ thống</h3>
+      <div class="fg" style="margin-top:15px"><label>Apps Script Web App URL</label>
+      <input id="cfg-url" type="text" placeholder="https://script.google.com/.../exec"/></div>
+      <button class="btn primary" onclick="saveConfig()">Lưu cấu hình</button>
     </div>
   </div>
 </div>
 
-<!-- PHIEU MODAL -->
-<div class="overlay" id="phieu-ov">
-  <div class="modal">
-    <div class="modal-hdr">
-      <h3>🖨️ Xem trước – Phiếu Đăng Ký Dự Thi MOS</h3>
-      <button class="modal-x" onclick="closeOv('phieu-ov')">✕</button>
-    </div>
-    <div class="modal-body" id="phieu-preview"></div>
-    <div class="modal-foot no-print">
-      <button class="btn sec" onclick="closeOv('phieu-ov')">Đóng</button>
-      <button class="btn primary" onclick="genPDF()">⬇️ Tải PDF</button>
-    </div>
-  </div>
-</div>
-
-<!-- HIDDEN print area -->
-<div id="phieu-print-area" style="display:none"></div>
-
-<div class="toast" id="toast"></div>
+<div id="toast" class="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-//  CONFIG & STATE
-// ══════════════════════════════════════════
-const SKEY = 'mos_v5';
 let API_URL = '';
-
-// In-memory state (loaded from localStorage fallback + sheet)
-let allDK    = [];   // all rows from DanhSach sheet
-let shownDK  = [];   // allDK minus hidden (per user)
-let dkFil    = [];   // filtered shownDK
-let hvRows   = [];   // current user's saved HV rows (from sheet)
-let hvFil    = [];   // filtered hvRows
-let selDK    = null, selHV = null;
-let accounts = [{u:'admin',p:'1234',role:'admin'}];
 let currentUser = null;
+let allDK = [], myHV = [];
+let selDK = null, selHV = null;
 
-// per-user hidden maHV keys (localStorage fallback while sheet saves async)
-let hiddenMap = {}; // {username: Set<maHV>}
+const g = id => document.getElementById(id);
 
-const MOCK_DK = [
-  {rowIndex:2,ngayDangKy:'21-03-2026',dotThi:'491',maHV:'1004214',hoTen:'Lê Nam Quân',soCCCD:'079202000377',gioiTinh:'Nam',ngaySinh:'05-03-2002',soDT:'0919989209',email:'lnq0503@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'15:30'},
-  {rowIndex:3,ngayDangKy:'23-03-2026',dotThi:'491',maHV:'1004208',hoTen:'Thái Ngọc Trâm',soCCCD:'079305024002',gioiTinh:'Nữ',ngaySinh:'10-12-2005',soDT:'0365571601',email:'thaingoctraman@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'17:00'},
-  {rowIndex:4,ngayDangKy:'27-03-2026',dotThi:'491',maHV:'1004218',hoTen:'Nguyễn Bảo Khang',soCCCD:'079206013443',gioiTinh:'Nam',ngaySinh:'24-04-2006',soDT:'0931445909',email:'nguyenkhang24@gmail.com',daThi:'Không',monThi:'Excel',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'15:30'},
-  {rowIndex:5,ngayDangKy:'26-03-2026',dotThi:'488',maHV:'1004229',hoTen:'Lê Hoài Bảo',soCCCD:'056307008366',gioiTinh:'Nữ',ngaySinh:'02-12-2007',soDT:'0786961519',email:'locle7155@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'03-04-2026',gioThi:'15:30'},
-  {rowIndex:6,ngayDangKy:'28-02-2026',dotThi:'487',maHV:'1004164',hoTen:'Nguyễn Trọng Trung',soCCCD:'082200012733',gioiTinh:'Nam',ngaySinh:'13-10-2000',soDT:'0354687702',email:'trung112161@gmail.com',daThi:'Có',monThi:'Excel',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'28-03-2026',gioThi:'14:00'},
-];
-const MOCK_LICH={slots:['08:00','09:30','11:00','14:00','15:30','17:00'],batches:[{label:'Đợt thi 490',date:'16-04-2026',counts:[2,2,2,0,0,0]},{label:'Đợt thi 491',date:'22-04-2026',counts:[0,0,0,0,2,1]}]};
-
-// ══════════════════════════════════════════
-//  PERSIST (localStorage)
-// ══════════════════════════════════════════
-function saveLs(){
-  const out={url:API_URL,hidden:{},accounts};
-  for(const u in hiddenMap) out.hidden[u]=[...hiddenMap[u]];
-  try{localStorage.setItem(SKEY,JSON.stringify(out));}catch(e){}
-}
-function loadLs(){
-  try{
-    const s=localStorage.getItem(SKEY); if(!s)return;
-    const d=JSON.parse(s);
-    if(d.url) API_URL=d.url;
-    if(d.accounts&&d.accounts.length) accounts=d.accounts;
-    if(d.hidden) for(const u in d.hidden) hiddenMap[u]=new Set(d.hidden[u]);
-  }catch(e){}
-  g('cfg-url').value=API_URL;
-}
-
-// ══════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════
-const g=id=>document.getElementById(id);
-const v=x=>x||'';
-function setSt(id,msg,cls=''){const e=g(id);if(!e)return;e.textContent=msg;e.className='sbar'+(cls?' '+cls:'');}
-function closeOv(id){g(id).classList.remove('open')}
-function openOv(id){g(id).classList.add('open')}
-function toast(msg,type='',dur=3200){
-  const t=g('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');
-  clearTimeout(t._tid);t._tid=setTimeout(()=>t.classList.remove('show'),dur);
-}
-
-async function api(params){
-  if(!API_URL) throw new Error('Chưa cấu hình URL');
-  const qs=Object.entries(params).map(([k,v2])=>`${k}=${encodeURIComponent(v2)}`).join('&');
-  const r=await fetch(API_URL+'?'+qs);
-  const d=await r.json();
-  if(d.error) throw new Error(d.error);
-  return d;
-}
-
-// ══════════════════════════════════════════
-//  LOGIN / LOGOUT
-// ══════════════════════════════════════════
-g('inp-p').onkeydown=e=>{if(e.key==='Enter')doLogin()};
-g('inp-u').onkeydown=e=>{if(e.key==='Enter')g('inp-p').focus()};
-
-async function doLogin(){
-  const u=g('inp-u').value.trim(), p=g('inp-p').value.trim();
-  g('lerr').textContent='';
-
-  // Try sheet accounts first if URL set
-  let acc=null;
-  if(API_URL){
-    try{
-      const sheetAccs=await api({action:'getAccounts'});
-      if(sheetAccs.length) accounts=sheetAccs;
-      saveLs();
-    }catch(e){}
-  }
-
-  acc=accounts.find(a=>a.u===u&&a.p===p);
-  if(!acc){g('lerr').textContent='❌ Tài khoản hoặc mật khẩu không đúng!';return;}
-
-  currentUser=acc;
-  g('login-screen').style.display='none';
-  const app=g('app');app.style.display='flex';app.style.flexDirection='column';
-  g('tuser').textContent='👤 '+u+(acc.role==='admin'?' ★':'');
-
-  const isAdmin=acc.role==='admin';
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
-
-  goTab('hv');
-  await loadDK();
-  await loadSchedule();
-  if(isAdmin) await loadAccounts();
-  await loadHV();
-}
-
-function doLogout(){
-  currentUser=null;selDK=null;selHV=null;hvRows=[];
-  g('app').style.display='none';
-  g('login-screen').style.display='flex';
-  g('inp-u').value='';g('inp-p').value='';
-}
-
-// ══════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════
-function goTab(key){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===key));
-  ['hv','dk','lt','acc','cfg'].forEach(k=>g('panel-'+k)?.classList.toggle('active',k===key));
-}
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>goTab(t.dataset.tab)));
-
-// ══════════════════════════════════════════
-//  LOAD DANH SÁCH ĐĂNG KÝ
-// ══════════════════════════════════════════
-async function loadDK(){
-  setSt('dk-st','⏳ Đang tải…');
-  resetSelDK();
-  try{
-    if(!API_URL) throw new Error('no url');
-    allDK=await api({action:'getAll'});
-    setSt('dk-st',`✅ Đã tải ${allDK.length} bản ghi`,'ok');
-  }catch(e){
-    allDK=[...MOCK_DK];
-    setSt('dk-st',API_URL?'⚠️ Lỗi kết nối – dữ liệu mẫu':'🧪 Dữ liệu mẫu (chưa cấu hình URL)','err');
-  }
-  buildDKVisible();
-}
-
-function buildDKVisible(){
-  const hidden=hiddenMap[currentUser?.u]||new Set();
-  shownDK=allDK.filter(r=>!hidden.has(r.maHV));
-  filterDK();
-}
-
-function filterDK(){
-  const fd=g('dk-fd').value.toLowerCase(),fm=g('dk-fm').value.toLowerCase(),
-        fn=g('dk-fn').value.toLowerCase(),ft=g('dk-ft').value.toLowerCase();
-  dkFil=shownDK.filter(r=>
-    (!fd||v(r.dotThi).toLowerCase().includes(fd))&&
-    (!fm||v(r.maHV).toLowerCase().includes(fm))&&
-    (!fn||v(r.hoTen).toLowerCase().includes(fn))&&
-    (!ft||v(r.ngayThi).toLowerCase().includes(ft)));
-  renderRows('dk',dkFil);
-}
-
-function clearFlt(tab){
-  [`${tab}-fd`,`${tab}-fm`,`${tab}-fn`,`${tab}-ft`].forEach(id=>{const e=g(id);if(e)e.value='';});
-  tab==='dk'?filterDK():filterHV();
-}
-
-function renderRows(tab,data){
-  const tbody=g(tab+'-body');
-  if(!data.length){
-    const msg=tab==='hv'
-      ?'Chưa có dữ liệu. Sang tab <b>Danh sách đăng ký</b> → chọn dòng → bấm <b>📥 Lấy Thông Tin</b>.'
-      :'Không có dữ liệu hoặc tất cả đã được lấy thông tin.';
-    tbody.innerHTML=`<tr><td colspan="16"><div class="tbl-empty"><div class="ico">${tab==='hv'?'📭':'✅'}</div><p>${msg}</p></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML=data.map((r,i)=>`
-    <tr id="${tab}-r${i}" onclick="selRow('${tab}',${i})">
-      <td class="num">${i+1}</td>
-      <td>${v(r.ngayDangKy)}</td><td><b>${v(r.dotThi)}</b></td><td>${v(r.maHV)}</td>
-      <td><b>${v(r.hoTen)}</b></td><td>${v(r.soCCCD)}</td><td>${v(r.gioiTinh)}</td>
-      <td>${v(r.ngaySinh)}</td><td>${v(r.soDT)}</td><td>${v(r.email)}</td>
-      <td><span class="badge ${r.daThi==='Có'?'by':'bn'}">${v(r.daThi)}</span></td>
-      <td><b>${v(r.monThi)}</b></td><td>${v(r.phienBan)}</td>
-      <td>${v(r.ngonNgu)}</td><td>${v(r.ngayThi)}</td><td>${v(r.gioThi)}</td>
-    </tr>`).join('');
-}
-
-function selRow(tab,i){
-  const prev=tab==='dk'?selDK:selHV;
-  if(prev!==null){const p=g(`${tab}-r${prev}`);if(p)p.classList.remove('sel');}
-  if(tab==='dk'){selDK=i;}else{selHV=i;}
-  g(`${tab}-r${i}`).classList.add('sel');
-  const r=tab==='dk'?dkFil[i]:hvFil[i];
-  const bar=g(`${tab}-sel`);
-  bar.className='sel-bar filled';
-  bar.innerHTML=`✅ Đang chọn: <b>${r.hoTen}</b> &nbsp;|&nbsp; <b>${r.maHV}</b> &nbsp;|&nbsp; ${r.monThi} ${r.phienBan} – ${r.ngayThi} lúc ${r.gioThi}`;
-  if(tab==='dk'){
-    g('dk-btn-lay').disabled=false;
-    g('dk-btn-xoa').disabled=false;
-  } else {
-    g('hv-btn-in').disabled=false;
-    g('hv-btn-copy').disabled=false;
-  }
-}
-
-function resetSelDK(){
-  selDK=null;
-  g('dk-sel').className='sel-bar empty';
-  g('dk-sel').textContent='💡 Chọn một dòng để thao tác';
-  g('dk-btn-lay').disabled=true;
-  g('dk-btn-xoa').disabled=true;
-}
-
-function resetSelHV(){
-  selHV=null;
-  g('hv-sel').className='sel-bar empty';
-  g('hv-sel').textContent='💡 Chọn một dòng để thao tác';
-  g('hv-btn-in').disabled=true;
-  g('hv-btn-copy').disabled=true;
-}
-
-// ══════════════════════════════════════════
-//  DK ACTIONS
-// ══════════════════════════════════════════
-async function dkLayThongTin(){
-  if(selDK===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
-  const r=dkFil[selDK];
-
-  // Req 5: nếu #N/A thì báo lỗi và ẩn khỏi DK
-  if(!r.dotThi||r.dotThi.includes('#N/A')||r.dotThi===''){
-    toast('⚠️ Đợt thi không tồn tại! Đang xóa dòng này khỏi danh sách…','warn');
-    hideFromDK(r.maHV);
-    return;
-  }
-
-  // Save to HV sheet
-  const u=currentUser.u;
-  setSt('dk-st','⏳ Đang lưu…');
-  try{
-    if(API_URL){
-      await api({action:'saveHVData',username:u,maHV:r.maHV,rowData:JSON.stringify(r)});
-      // Req 8: decrement slot
-      await api({action:'decrementSlot',dotThi:r.dotThi,gioThi:r.gioThi});
+// 1. SESSION & LOGIN
+function loadSession() {
+    const data = localStorage.getItem('mos_session_v2');
+    if (data) {
+        const parsed = JSON.parse(data);
+        API_URL = parsed.url || '';
+        g('cfg-url').value = API_URL;
+        if (parsed.user) {
+            currentUser = parsed.user;
+            showApp();
+        }
     }
-  }catch(e){}
-
-  // Add to local hvRows
-  if(!hvRows.find(x=>x.maHV===r.maHV)) hvRows.push({...r});
-  // Hide from DK
-  hideFromDK(r.maHV);
-  filterHV();
-  setSt('hv-st',`📋 ${hvRows.length} học viên của bạn`);
-  toast('📥 Đã lấy thông tin của '+r.hoTen,'ok');
-  goTab('hv');
 }
 
-function hideFromDK(maHV){
-  const u=currentUser?.u; if(!u) return;
-  if(!hiddenMap[u]) hiddenMap[u]=new Set();
-  hiddenMap[u].add(maHV);
-  saveLs();
-  buildDKVisible();
-  resetSelDK();
-}
-
-async function dkXoa(){
-  if(selDK===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
-  const r=dkFil[selDK];
-  if(!confirm(`Xóa thông tin "${r.hoTen}" khỏi danh sách của bạn?`)) return;
-
-  const u=currentUser.u;
-  // Remove from hvRows
-  hvRows=hvRows.filter(x=>x.maHV!==r.maHV);
-  // Un-hide from DK
-  if(hiddenMap[u]) hiddenMap[u].delete(r.maHV);
-  saveLs();
-
-  // Delete from sheet
-  if(API_URL){
-    try{ await api({action:'saveHVData',username:u,maHV:r.maHV,delete:'true'}); }catch(e){}
-  }
-
-  buildDKVisible();
-  filterHV();
-  setSt('hv-st',`📋 ${hvRows.length} học viên của bạn`);
-  toast('🗑️ Đã xóa '+r.hoTen,'ok');
-}
-
-// ══════════════════════════════════════════
-//  HV
-// ══════════════════════════════════════════
-async function loadHV(){
-  const u=currentUser?.u; if(!u) return;
-  // Try load from sheet
-  if(API_URL){
-    try{
-      const data=await api({action:'getHVData',username:u});
-      if(Array.isArray(data)&&data.length) hvRows=data;
-    }catch(e){}
-  }
-  // Merge hidden map from hvRows
-  if(!hiddenMap[u]) hiddenMap[u]=new Set();
-  hvRows.forEach(r=>hiddenMap[u].add(r.maHV));
-  saveLs();
-  buildDKVisible();
-  filterHV();
-  setSt('hv-st',hvRows.length?`📋 ${hvRows.length} học viên của bạn`:'');
-}
-
-function filterHV(){
-  const fd=g('hv-fd').value.toLowerCase(),fm=g('hv-fm').value.toLowerCase(),
-        fn=g('hv-fn').value.toLowerCase(),ft=g('hv-ft').value.toLowerCase();
-  hvFil=hvRows.filter(r=>
-    (!fd||v(r.dotThi).toLowerCase().includes(fd))&&
-    (!fm||v(r.maHV).toLowerCase().includes(fm))&&
-    (!fn||v(r.hoTen).toLowerCase().includes(fn))&&
-    (!ft||v(r.ngayThi).toLowerCase().includes(ft)));
-  resetSelHV();
-  renderRows('hv',hvFil);
-}
-
-function doInPhieu(){
-  if(selHV===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
-  const r=hvFil[selHV];
-  currentPDFrow=r;
-  buildPreview(r);
-  openOv('phieu-ov');
-}
-
-function doCopy(){
-  if(selHV===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
-  const r=hvFil[selHV];
-  // Req 7: only Họ tên, Môn thi, Phiên bản, Ngày thi, Giờ thi
-  const msg=`Họ và tên: ${r.hoTen}\nMôn thi: ${r.monThi} ${r.phienBan}\nNgày thi: ${r.ngayThi} – ${r.gioThi}`;
-  navigator.clipboard.writeText(msg)
-    .then(()=>toast('📋 Đã copy thông tin '+r.hoTen,'ok'))
-    .catch(()=>toast('⚠️ Copy thất bại – dùng Chrome/Edge','warn'));
-}
-
-// ══════════════════════════════════════════
-//  SCHEDULE
-// ══════════════════════════════════════════
-async function loadSchedule(){
-  setSt('lt-st','⏳ Đang tải lịch thi…');
-  let data=MOCK_LICH,ok=false;
-  if(API_URL){
-    try{data=await api({action:'getSchedule'});ok=true;}catch(e){}
-  }
-  renderSchedule(data);
-  setSt('lt-st',ok?'✅ Đã tải lịch thi':'🧪 Lịch mẫu'+(API_URL?' (lỗi kết nối)':''),ok?'ok':'');
-}
-
-function renderSchedule(d){
-  const slots=d.slots||[],batches=d.batches||[];
-  if(!slots.length){g('sch-area').innerHTML='<p style="color:var(--g500);padding:16px">Không có dữ liệu lịch thi.</p>';return;}
-
-  let html='<table class="sch-table"><thead><tr><th class="sch-corner"></th>';
-  batches.forEach(b=>{
-    html+=`<th class="sch-head-cell">${b.label}<div class="sch-head-date">${b.date}</div></th>`;
-  });
-  html+='</tr></thead><tbody>';
-
-  slots.forEach((slot,si)=>{
-    html+=`<tr><td class="sch-time-cell">${slot}</td>`;
-    batches.forEach(b=>{
-      const cnt=(b.counts||[])[si]||0;
-      if(cnt>0){
-        html+=`<td class="sch-cell-wrap"><div class="sch-cell-on">${cnt}</div></td>`;
-      } else {
-        html+=`<td class="sch-cell-wrap"><div class="sch-cell-off"></div></td>`;
-      }
-    });
-    html+='</tr>';
-  });
-  html+='</tbody></table>';
-  g('sch-area').innerHTML=html;
-}
-
-// ══════════════════════════════════════════
-//  ACCOUNTS
-// ══════════════════════════════════════════
-async function loadAccounts(){
-  setSt('acc-st','⏳ Đang tải…');
-  if(API_URL){
-    try{
-      const data=await api({action:'getAccounts'});
-      if(data.length){accounts=data;saveLs();}
-      setSt('acc-st',`✅ ${accounts.length} tài khoản`,'ok');
-    }catch(e){setSt('acc-st','⚠️ Dùng dữ liệu local','err');}
-  }
-  renderAccTable();
-}
-
-function renderAccTable(){
-  g('acc-body').innerHTML=accounts.map((a,i)=>`
-    <tr><td>${i+1}</td><td><b>${a.u}</b></td>
-    <td><span class="badge ${a.role==='admin'?'by':'bn'}">${a.role}</span></td>
-    <td>
-      <button class="btn sec" style="padding:3px 9px;font-size:11px" onclick="accEdit(${i})">✏️ Sửa</button>
-      ${a.u!=='admin'?`<button class="btn danger" style="padding:3px 9px;font-size:11px;margin-left:4px" onclick="accDel(${i})">🗑️ Xóa</button>`:''}
-    </td></tr>`).join('');
-}
-
-async function accSave(){
-  const u=g('acc-u').value.trim(),p=g('acc-p').value.trim(),r=g('acc-r').value;
-  if(!u||!p){toast('⚠️ Nhập đủ tên và mật khẩu!','warn');return;}
-  const idx=accounts.findIndex(a=>a.u===u);
-  if(idx>=0) accounts[idx]={u,p,role:r};
-  else accounts.push({u,p,role:r});
-  saveLs();
-  // Sync to sheet
-  if(API_URL){
-    try{await api({action:'saveAccount',username:u,password:p,role:r});}
-    catch(e){toast('⚠️ Đã lưu local, lỗi sync sheet: '+e.message,'warn');}
-  }
-  renderAccTable();
-  g('acc-u').value='';g('acc-p').value='';
-  toast('✅ Đã lưu tài khoản '+u,'ok');
-}
-
-function accEdit(i){g('acc-u').value=accounts[i].u;g('acc-p').value=accounts[i].p;g('acc-r').value=accounts[i].role;}
-
-async function accDel(i){
-  if(accounts[i].u==='admin'){toast('⚠️ Không thể xóa admin!','warn');return;}
-  if(!confirm(`Xóa tài khoản "${accounts[i].u}"?`)) return;
-  const u=accounts[i].u;
-  accounts.splice(i,1);saveLs();
-  if(API_URL){try{await api({action:'deleteAccount',username:u});}catch(e){}}
-  renderAccTable();
-  toast('🗑️ Đã xóa tài khoản '+u,'ok');
-}
-
-// ══════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════
-function saveConfig(){
-  API_URL=g('cfg-url').value.trim();
-  saveLs();
-  toast('✅ Đã lưu cấu hình!','ok');
-}
-async function testConn(){
-  if(!API_URL){toast('⚠️ Chưa nhập URL!','warn');return;}
-  toast('🔌 Đang test…');
-  try{
-    const d=await api({action:'test'});
-    toast('✅ Kết nối OK! Sheets: '+d.sheets,'ok');
-  }catch(e){toast('❌ Lỗi: '+e.message,'err');}
-}
-function useMock(){
-  allDK=[...MOCK_DK];buildDKVisible();
-  renderSchedule(MOCK_LICH);
-  toast('🧪 Đã tải dữ liệu mẫu');
-  goTab('dk');
-}
-
-// ══════════════════════════════════════════
-//  PHIEU PREVIEW
-// ══════════════════════════════════════════
-let currentPDFrow=null;
-
-function ch(str){
-  return String(str).replace(/[-:]/g,'').split('').map(c=>
-    `<span style="display:inline-flex;align-items:center;justify-content:center;
-      width:24px;height:24px;border:1.5px solid #000;font-weight:700;font-size:11px;margin:1px">${c}</span>`
-  ).join('');
-}
-function bx(txt,w='auto'){
-  return `<span style="display:inline-block;border:1.5px solid #000;padding:3px 8px;
-    font-weight:600;font-size:11px;min-width:${w};white-space:nowrap">${txt}</span>`;
-}
-
-function buildPreview(r){
-  const today=new Date();
-  const dd=String(today.getDate()).padStart(2,'0'),
-        mm=String(today.getMonth()+1).padStart(2,'0'),
-        yy=today.getFullYear();
-  g('phieu-preview').innerHTML=`
-  <div style="font-family:Arial,sans-serif;font-size:12px;padding:6px;max-width:680px;margin:0 auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:52px;height:52px;background:#1a4fa0;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
-          <span style="color:#fff;font-size:20px;font-weight:900;font-style:italic;line-height:1;letter-spacing:-1px">MS</span>
-          <span style="color:rgba(255,255,255,.8);font-size:4.5px;text-align:center;margin-top:2px">TRUNG TÂM TIN HỌC THỰC HÀNH</span>
-        </div>
-        <b style="font-size:16px;letter-spacing:.3px">PHIẾU ĐĂNG KÝ DỰ THI MOS</b>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:18px;font-weight:900">
-          <span style="color:#1a4fa0">I</span><span style="color:#e53935">I</span><span style="color:#43a047">G</span>
-        </div>
-        <div style="font-size:8px;color:#555">IIG VIET NAM</div>
-      </div>
-      <div style="border:2px solid #000;padding:5px 12px;font-weight:700;font-size:12px">ĐỢT THI: ${v(r.dotThi)}</div>
-    </div>
-    <hr style="margin-bottom:10px"/>
-    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Họ và tên:</b>${bx((r.hoTen||'').toUpperCase(),'200px')}
-      <b style="margin-left:10px">Mã HV:</b><span>${ch(v(r.maHV))}</span>
-    </div>
-    <div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <b>Số CCCD (còn hạn):</b><span>${ch(v(r.soCCCD))}</span>
-    </div>
-    <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Giới tính:</b>${bx(v(r.gioiTinh),'55px')}
-      <b style="margin-left:10px">Ngày sinh:</b><span>${ch(v(r.ngaySinh).replace(/-/g,''))}</span>
-    </div>
-    <div style="font-size:9px;color:#777;margin:0 0 8px 162px">dd/mm/yyyy</div>
-    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Số điện thoại:</b><span>${ch(v(r.soDT))}</span>
-    </div>
-    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Email:</b>${bx(v(r.email),'190px')}
-      <b style="margin-left:10px">Đã thi MOS:</b>${bx(v(r.daThi),'55px')}
-    </div>
-    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Môn thi:</b>${bx(v(r.monThi),'65px')}
-      <b style="margin-left:8px">Phiên bản:</b>${bx(v(r.phienBan),'50px')}
-      <b style="margin-left:8px">Ngôn ngữ:</b>${bx(v(r.ngonNgu),'85px')}
-    </div>
-    <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <b>Ngày thi:</b><span>${ch(v(r.ngayThi).replace(/-/g,''))}</span>
-      <b style="margin-left:14px">Giờ thi:</b><span>${ch(v(r.gioThi).replace(':',''))}</span>
-    </div>
-    <div style="font-size:9px;color:#777;margin:0 0 12px 70px">dd/mm/yyyy &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hh/mm</div>
-    <p style="margin-bottom:8px">Tôi cam kết đã hoàn thành đầy đủ các nội dung bên dưới:</p>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px">
-      <tr style="background:#eee">
-        <th style="border:1px solid #000;padding:5px;width:28px">STT</th>
-        <th style="border:1px solid #000;padding:5px">Nội dung cần thực hiện</th>
-        <th style="border:1px solid #000;padding:5px;width:55px">Đã thực hiện</th>
-        <th style="border:1px solid #000;padding:5px;width:60px">Ghi chú</th>
-      </tr>
-      ${['Đã đọc kỹ tài liệu Sổ tay (Handbook) & Hướng dẫn dự thi MOS 2016/2019. (Phần 1,2 sách luyện thi MOS)',
-         'Đã luyện xong các kỹ năng Core Skill Reviews trên GMetrix. (Phần 4 sách luyện thi MOS)',
-         'Đã luyện thi xong Practice Exams trên GMetrix. (Phần 5 sách luyện thi MOS)',
-         'Đã đọc kỹ & hiểu rõ <b>quy định hủy thi</b>. Cam kết chấp hành.',
-         'Thông tin tôi cung cấp là hoàn toàn chính xác. Tôi chịu mọi trách nhiệm.']
-        .map((t,i)=>`<tr><td style="border:1px solid #000;padding:4px;text-align:center">${i+1}</td>
-          <td style="border:1px solid #000;padding:4px 6px">${t}</td>
-          <td style="border:1px solid #000;padding:4px;text-align:center">☐</td>
-          <td style="border:1px solid #000"></td></tr>`).join('')}
-    </table>
-    <b style="font-size:12px;text-decoration:underline">QUI ĐỊNH HỦY THI</b>
-    <ul style="font-size:11px;margin:6px 0 10px 16px;line-height:1.65">
-      <li>Hủy thi: phải báo trung tâm trước 10 ngày.</li>
-      <li>Hủy thi khẩn cấp: cần có giấy tờ chứng minh (ốm đau, tai nạn…). IIG sẽ xem xét hoàn phí.</li>
-      <li>Các trường hợp khác không có lý do chính đáng: mất lệ phí thi.</li>
-    </ul>
-    <div style="text-align:right;font-style:italic;font-size:11px;margin-bottom:10px">TP. Hồ Chí Minh, ngày ${dd} tháng ${mm} năm ${yy}</div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px">
-      <div style="text-align:center;width:47%"><b>GV NHẬN ĐĂNG KÝ</b><br><span style="font-size:10px;font-weight:400">(Ký, ghi rõ họ tên)</span></div>
-      <div style="text-align:center;width:47%"><b>HỌC VIÊN ĐĂNG KÝ</b><br><span style="font-size:10px;font-weight:400">(Ký, ghi rõ họ tên)</span></div>
-    </div>
-    <div style="display:flex;justify-content:space-between">
-      <div style="border:1px solid #000;width:47%;height:65px"></div>
-      <div style="border:1px solid #000;width:47%;height:65px"></div>
-    </div>
-  </div>`;
-}
-
-// ══════════════════════════════════════════
-//  PDF (jsPDF)
-// ══════════════════════════════════════════
-function genPDF(){
-  const r=currentPDFrow; if(!r){toast('⚠️ Không có dữ liệu','warn');return;}
-  try{
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF({unit:'mm',format:'a4'});
-    const W=210,ML=18,MR=18,PW=210-ML-MR;
-    const today=new Date();
-    const dd=String(today.getDate()).padStart(2,'0'),
-          mm=String(today.getMonth()+1).padStart(2,'0'),
-          yy=today.getFullYear();
-
-    function sf(sz,st='normal'){doc.setFontSize(sz);doc.setFont('helvetica',st);}
-    function cellRow(x,y,str,cw=6,ch=6.2){
-      String(str).replace(/[-:]/g,'').split('').forEach((c,i)=>{
-        const cx=x+i*(cw+0.5);
-        doc.rect(cx,y,cw,ch);
-        sf(9,'bold');doc.text(c,cx+cw/2,y+ch-1.3,{align:'center'});
-      });
+async function doLogin() {
+    const u = g('inp-u').value, p = g('inp-p').value;
+    if (u && p) { 
+        currentUser = { u: u, role: 'user' };
+        localStorage.setItem('mos_session_v2', JSON.stringify({user: currentUser, url: API_URL}));
+        showApp();
     }
-    function field(x,y,txt,w,h=6.2){
-      doc.rect(x,y,w,h);sf(9,'bold');doc.text(String(txt),x+2,y+h-1.5,{maxWidth:w-3});
-    }
-
-    let y=14;
-    // ĐỢT THI
-    sf(9,'bold');doc.rect(W-MR-34,y-5,34,7);
-    doc.text('DOT THI: '+v(r.dotThi),W-MR-17,y-0.5,{align:'center'});
-
-    // MS
-    doc.setFillColor(26,79,160);doc.rect(ML,y-5,17,17,'F');
-    doc.setTextColor(255,255,255);sf(13,'bolditalic');
-    doc.text('MS',ML+8.5,y+3.5,{align:'center'});
-    doc.setFontSize(4);doc.text('TRUNG TAM',ML+8.5,y+7,{align:'center'});
-    doc.setTextColor(0,0,0);
-
-    // TITLE
-    sf(15,'bold');doc.text('PHIEU DANG KY DU THI MOS',W/2,y+4,{align:'center'});
-
-    // IIG
-    sf(13,'bold');
-    doc.setTextColor(26,79,160);doc.text('I',W-MR-20,y+3);
-    doc.setTextColor(229,57,53);doc.text('I',W-MR-14,y+3);
-    doc.setTextColor(67,160,71);doc.text('G',W-MR-8,y+3);
-    doc.setTextColor(0,0,0);sf(6,'normal');
-    doc.text('IIG VIET NAM',W-MR-20,y+8);
-
-    y+=17;doc.line(ML,y,W-MR,y);y+=6;
-
-    sf(9,'normal');doc.text('Ho va ten:',ML,y);
-    field(ML+20,y-5,(r.hoTen||'').toUpperCase(),82);
-    doc.text('Ma HV:',ML+106,y);
-    cellRow(ML+120,y-5,v(r.maHV));y+=9;
-
-    doc.text('So CCCD (con han):',ML,y);
-    cellRow(ML+39,y-5,v(r.soCCCD));y+=9;
-
-    doc.text('Gioi tinh:',ML,y);
-    field(ML+20,y-5,v(r.gioiTinh),20);
-    doc.text('Ngay sinh:',ML+45,y);
-    cellRow(ML+64,y-5,v(r.ngaySinh).replace(/-/g,''));
-    sf(7,'normal');doc.text('dd/mm/yyyy',ML+64,y+3.5);y+=11;
-
-    sf(9,'normal');doc.text('So dien thoai:',ML,y);
-    cellRow(ML+31,y-5,v(r.soDT));y+=9;
-
-    doc.text('Email:',ML,y);field(ML+13,y-5,v(r.email),82);
-    doc.text('Da thi MOS:',ML+99,y);field(ML+120,y-5,v(r.daThi),22);y+=9;
-
-    doc.text('Mon thi:',ML,y);field(ML+17,y-5,v(r.monThi),25);
-    doc.text('Phien ban:',ML+46,y);field(ML+63,y-5,v(r.phienBan),18);
-    doc.text('Ngon ngu:',ML+85,y);field(ML+101,y-5,v(r.ngonNgu),34);y+=9;
-
-    doc.text('Ngay thi:',ML,y);
-    cellRow(ML+19,y-5,v(r.ngayThi).replace(/-/g,''));
-    sf(7,'normal');doc.text('dd/mm/yyyy',ML+19,y+3.5);
-    sf(9,'normal');doc.text('Gio thi:',ML+77,y);
-    cellRow(ML+90,y-5,v(r.gioThi).replace(':',''));
-    sf(7,'normal');doc.text('hh/mm',ML+90,y+3.5);y+=12;
-
-    sf(9,'normal');doc.text('Toi cam ket da hoan thanh day du cac noi dung ben duoi:',ML,y);y+=4;
-
-    // Cam kết table
-    const hdr=['STT','Noi dung can thuc hien','Da thuc hien','Ghi chu'];
-    const cw=[9,108,18,19];
-    const rows2=[
-      ['1','Da doc ky tai lieu So tay & Huong dan du thi MOS 2016/2019. (Phan 1,2 sach luyen thi MOS)'],
-      ['2','Da luyen xong Core Skill Reviews tren GMetrix. (Phan 4 sach luyen thi MOS)'],
-      ['3','Da luyen thi xong Practice Exams tren GMetrix. (Phan 5 sach luyen thi MOS)'],
-      ['4','Da doc ky & hieu ro quy dinh huy thi. Cam ket chap hanh.'],
-      ['5','Thong tin toi cung cap la hoan toan chinh xac. Toi chiu moi trach nhiem.'],
-    ];
-    doc.setFillColor(220,220,220);
-    let tx=ML;
-    cw.forEach((w,i)=>{doc.rect(tx,y,w,6,'FD');sf(7,'bold');
-      doc.text(hdr[i],tx+w/2,y+4,{align:'center',maxWidth:w-1});tx+=w;});
-    y+=6;
-    rows2.forEach(row=>{
-      const lines=doc.splitTextToSize(row[1],cw[1]-3);
-      const rh=Math.max(6,lines.length*4+3);
-      tx=ML;cw.forEach((w,i)=>{doc.rect(tx,y,w,rh);
-        sf(7,'normal');
-        if(i===0||i===2||i===3) doc.text(i===2?'[ ]':(row[i]||''),tx+w/2,y+rh/2+1,{align:'center'});
-        else doc.text(lines,tx+1.5,y+4.5);
-        tx+=w;});
-      y+=rh;
-    });y+=4;
-
-    sf(9,'bold');doc.text('QUI DINH HUY THI',ML,y);
-    doc.line(ML,y+1,ML+42,y+1);y+=6;sf(8,'normal');
-    ['• Huy thi: bao truoc 10 ngay.',
-     '• Huy thi khan cap: can giay to chung minh. IIG xem xet hoan phi.',
-     '• Truong hop khac khong co ly do: mat le phi thi.']
-    .forEach(s=>{const ls=doc.splitTextToSize(s,PW-4);doc.text(ls,ML+2,y);y+=ls.length*4.5+1;});
-    y+=3;
-
-    sf(9,'italic');doc.text(`TP. Ho Chi Minh, ngay ${dd} thang ${mm} nam ${yy}`,W-MR,y,{align:'right'});y+=7;
-    sf(9,'bold');
-    doc.text('GV NHAN DANG KY',ML+20,y,{align:'center'});
-    doc.text('HOC VIEN DANG KY',ML+PW/2+20,y,{align:'center'});
-    y+=4;sf(8,'normal');
-    doc.text('(Ky, ghi ro ho ten)',ML+20,y,{align:'center'});
-    doc.text('(Ky, ghi ro ho ten)',ML+PW/2+20,y,{align:'center'});
-    y+=2;
-    doc.rect(ML,y,PW/2-3,24);doc.rect(ML+PW/2+3,y,PW/2-3,24);
-
-    doc.save(`phieu_${(r.maHV||'hv')}.pdf`);
-    toast('✅ Đã tải PDF!','ok');
-    closeOv('phieu-ov');
-  }catch(e){toast('❌ Lỗi PDF: '+e.message,'err');console.error(e);}
 }
 
-// ══════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════
-loadLs();
-renderSchedule(MOCK_LICH);
+function showApp() {
+    g('login-screen').style.display = 'none';
+    g('app').style.display = 'flex';
+    g('tuser').textContent = 'Tài khoản: ' + currentUser.u;
+    loadDK();
+}
+
+function doLogout() {
+    localStorage.removeItem('mos_session_v2');
+    location.reload();
+}
+
+// 2. API & DATA
+async function api(params) {
+    if (!API_URL) { toast('Chưa cấu hình URL Apps Script!', 'red'); return; }
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}?${qs}`);
+    return await res.json();
+}
+
+async function loadDK() {
+    try {
+        toast('Đang tải dữ liệu...', '#555');
+        const data = await api({ action: 'getAvailable' });
+        allDK = data || [];
+        renderDK();
+    } catch (e) { toast('Lỗi kết nối Server!', 'red'); }
+}
+
+function renderDK() {
+    g('dk-body').innerHTML = allDK.map((r, i) => `
+        <tr onclick="selectDK(${i})" class="${selDK===i?'sel':''}">
+            <td>${i+1}</td><td>${r.ngayDangKy||''}</td><td>${r.maHV}</td>
+            <td><b>${r.hoTen}</b></td><td>${r.monThi}</td><td>${r.ngayThi||''}</td>
+        </tr>
+    `).join('');
+    g('btn-get').disabled = true;
+}
+
+function selectDK(i) {
+    selDK = i;
+    renderDK();
+    g('btn-get').disabled = false;
+}
+
+async function dkGetInfo() {
+    if (selDK === null) return;
+    const item = allDK[selDK];
+    try {
+        toast('Đang xử lý đồng bộ...', 'teal');
+        await api({
+            action: 'saveHVData',
+            user: currentUser.u,
+            maHV: item.maHV,
+            data: JSON.stringify(item)
+        });
+        toast('Thành công! Dòng này đã được ẩn với mọi người.', 'green');
+        selDK = null;
+        await loadDK(); 
+        goTab('hv');
+    } catch (e) { toast('Lỗi xử lý!', 'red'); }
+}
+
+async function loadHV() {
+    try {
+        const data = await api({ action: 'getMyStudents', user: currentUser.u });
+        myHV = data || [];
+        renderHV();
+    } catch (e) { toast('Lỗi tải danh sách học viên!', 'red'); }
+}
+
+function renderHV() {
+    g('hv-body').innerHTML = myHV.map((r, i) => `
+        <tr onclick="selectHV(${i})" class="${selHV===i?'sel':''}">
+            <td>${i+1}</td><td>${r.dotThi}</td><td>${r.maHV}</td>
+            <td><b>${r.hoTen}</b></td><td>${r.monThi}</td><td>✅ Đã lấy</td>
+        </tr>
+    `).join('');
+    g('btn-print').disabled = true;
+}
+
+function selectHV(i) {
+    selHV = i;
+    renderHV();
+    g('btn-print').disabled = false;
+}
+
+// 3. PRINT DIRECT (IN TRỰC TIẾP)
+function doPrintDirect() {
+    if (selHV === null) return;
+    const r = myHV[selHV];
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Phiếu Đăng Ký - ${r.hoTen}</title>
+            <style>
+                body { font-family: "Segoe UI", Tahoma, sans-serif; padding: 40px; color: #333; }
+                .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
+                .title { font-size: 24px; font-weight: bold; }
+                .info-row { margin: 15px 0; font-size: 16px; display: flex; }
+                .label { font-weight: bold; width: 150px; }
+                .footer { margin-top: 60px; display: flex; justify-content: space-between; }
+                .sign { text-align: center; width: 250px; }
+                @media print { .no-print { display: none; } }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="title">PHIẾU ĐĂNG KÝ DỰ THI MOS</div>
+                <div style="margin-top:5px">Trung Tâm Tin Học Thực Hành MS</div>
+            </div>
+            <div class="info-row"><span class="label">Họ và Tên:</span> <span>${r.hoTen}</span></div>
+            <div class="info-row"><span class="label">Mã Học Viên:</span> <span>${r.maHV}</span></div>
+            <div class="info-row"><span class="label">Môn Thi:</span> <span>${r.monThi}</span></div>
+            <div class="info-row"><span class="label">Đợt Thi:</span> <span>${r.dotThi}</span></div>
+            <div class="info-row"><span class="label">Ngày Thi:</span> <span>${r.ngayThi || 'Theo thông báo'}</span></div>
+            
+            <div style="margin-top:30px; font-style: italic; border: 1px dashed #ccc; padding: 10px;">
+                Lưu ý: Thí sinh mang theo CCCD bản gốc khi đi thi và có mặt trước 15 phút.
+            </div>
+
+            <div class="footer">
+                <div class="sign">Người đăng ký<br><br><br><br><b>${r.hoTen}</b></div>
+                <div class="sign">Người tiếp nhận<br><br><br><br><b>${currentUser.u}</b></div>
+            </div>
+            <script>
+                window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// 4. UI TABS & UTILS
+function goTab(t) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    g('panel-' + t).classList.add('active');
+    document.querySelector(`[data-tab="${t}"]`).classList.add('active');
+    if (t === 'hv') loadHV();
+}
+
+function saveConfig() {
+    API_URL = g('cfg-url').value;
+    localStorage.setItem('mos_session_v2', JSON.stringify({user: currentUser, url: API_URL}));
+    toast('Đã lưu cấu hình!', 'green');
+}
+
+function toast(m, c) {
+    const t = g('toast');
+    t.textContent = m; t.style.background = c; t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+}
+
+window.onload = loadSession;
 </script>
 </body>
 </html>
