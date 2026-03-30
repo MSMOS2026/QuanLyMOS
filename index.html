@@ -191,6 +191,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
 </head>
 <body>
 
+<!-- ═══ LOGIN ═══ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="ms-logo-big">
@@ -208,6 +209,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
   </div>
 </div>
 
+<!-- ═══ APP ═══ -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-ms">MS</div>
@@ -226,6 +228,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
     <button class="tab admin-only" data-tab="cfg" style="display:none">⚙️ Cấu hình</button>
   </div>
 
+  <!-- ── HV: Thông tin học viên ── -->
   <div class="panel active" id="panel-hv">
     <div class="abar">
       <button class="btn primary" onclick="loadDK()">🔄 Refresh</button>
@@ -258,6 +261,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
     </div></div>
   </div>
 
+  <!-- ── DK: Danh sách đăng ký ── -->
   <div class="panel" id="panel-dk">
     <div class="abar">
       <button class="btn primary" onclick="loadDK()">🔄 Refresh</button>
@@ -289,6 +293,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
     </div></div>
   </div>
 
+  <!-- ── LT: Lịch Thi ── -->
   <div class="panel" id="panel-lt">
     <div class="abar">
       <button class="btn primary" onclick="loadSchedule()">🔄 Tải lịch thi</button>
@@ -297,6 +302,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
     <div class="sch-outer" id="sch-area"></div>
   </div>
 
+  <!-- ── ACC: Tài khoản ── -->
   <div class="panel" id="panel-acc">
     <div class="cfg-card" style="max-width:620px">
       <h4>👥 Quản lý tài khoản</h4>
@@ -319,6 +325,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
     </div>
   </div>
 
+  <!-- ── CFG: Cấu hình ── -->
   <div class="panel" id="panel-cfg">
     <div class="cfg-card">
       <h4>⚙️ Cấu hình kết nối Google Sheets</h4>
@@ -342,6 +349,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
   </div>
 </div>
 
+<!-- PHIEU MODAL -->
 <div class="overlay" id="phieu-ov">
   <div class="modal">
     <div class="modal-hdr">
@@ -356,6 +364,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
   </div>
 </div>
 
+<!-- HIDDEN print area -->
 <div id="phieu-print-area" style="display:none"></div>
 
 <div class="toast" id="toast"></div>
@@ -367,22 +376,25 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
 const SKEY = 'mos_v5';
 let API_URL = '';
 
-// In-memory state
-let allDK    = [];
-let shownDK  = [];
-let dkFil    = [];
-let hvRows   = [];
-let hvFil    = [];
+// In-memory state (loaded from localStorage fallback + sheet)
+let allDK    = [];   // all rows from DanhSach sheet
+let shownDK  = [];   // allDK minus hidden (per user)
+let dkFil    = [];   // filtered shownDK
+let hvRows   = [];   // current user's saved HV rows (from sheet)
+let hvFil    = [];   // filtered hvRows
 let selDK    = null, selHV = null;
 let accounts = [{u:'admin',p:'1234',role:'admin'}];
 let currentUser = null;
 
-let hiddenMap = {}; 
+// per-user hidden maHV keys (localStorage fallback while sheet saves async)
+let hiddenMap = {}; // {username: Set<maHV>}
 
 const MOCK_DK = [
   {rowIndex:2,ngayDangKy:'21-03-2026',dotThi:'491',maHV:'1004214',hoTen:'Lê Nam Quân',soCCCD:'079202000377',gioiTinh:'Nam',ngaySinh:'05-03-2002',soDT:'0919989209',email:'lnq0503@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'15:30'},
   {rowIndex:3,ngayDangKy:'23-03-2026',dotThi:'491',maHV:'1004208',hoTen:'Thái Ngọc Trâm',soCCCD:'079305024002',gioiTinh:'Nữ',ngaySinh:'10-12-2005',soDT:'0365571601',email:'thaingoctraman@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'17:00'},
   {rowIndex:4,ngayDangKy:'27-03-2026',dotThi:'491',maHV:'1004218',hoTen:'Nguyễn Bảo Khang',soCCCD:'079206013443',gioiTinh:'Nam',ngaySinh:'24-04-2006',soDT:'0931445909',email:'nguyenkhang24@gmail.com',daThi:'Không',monThi:'Excel',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'22-04-2026',gioThi:'15:30'},
+  {rowIndex:5,ngayDangKy:'26-03-2026',dotThi:'488',maHV:'1004229',hoTen:'Lê Hoài Bảo',soCCCD:'056307008366',gioiTinh:'Nữ',ngaySinh:'02-12-2007',soDT:'0786961519',email:'locle7155@gmail.com',daThi:'Không',monThi:'Word',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'03-04-2026',gioThi:'15:30'},
+  {rowIndex:6,ngayDangKy:'28-02-2026',dotThi:'487',maHV:'1004164',hoTen:'Nguyễn Trọng Trung',soCCCD:'082200012733',gioiTinh:'Nam',ngaySinh:'13-10-2000',soDT:'0354687702',email:'trung112161@gmail.com',daThi:'Có',monThi:'Excel',phienBan:'2019',ngonNgu:'Tiếng Anh',ngayThi:'28-03-2026',gioThi:'14:00'},
 ];
 const MOCK_LICH={slots:['08:00','09:30','11:00','14:00','15:30','17:00'],batches:[{label:'Đợt thi 490',date:'16-04-2026',counts:[2,2,2,0,0,0]},{label:'Đợt thi 491',date:'22-04-2026',counts:[0,0,0,0,2,1]}]};
 
@@ -390,7 +402,7 @@ const MOCK_LICH={slots:['08:00','09:30','11:00','14:00','15:30','17:00'],batches
 //  PERSIST (localStorage)
 // ══════════════════════════════════════════
 function saveLs(){
-  const out={url:API_URL,hidden:{},accounts,currentUser:currentUser};
+  const out={url:API_URL,hidden:{},accounts};
   for(const u in hiddenMap) out.hidden[u]=[...hiddenMap[u]];
   try{localStorage.setItem(SKEY,JSON.stringify(out));}catch(e){}
 }
@@ -401,7 +413,6 @@ function loadLs(){
     if(d.url) API_URL=d.url;
     if(d.accounts&&d.accounts.length) accounts=d.accounts;
     if(d.hidden) for(const u in d.hidden) hiddenMap[u]=new Set(d.hidden[u]);
-    if(d.currentUser) currentUser=d.currentUser; // Khôi phục session
   }catch(e){}
   g('cfg-url').value=API_URL;
 }
@@ -429,7 +440,7 @@ async function api(params){
 }
 
 // ══════════════════════════════════════════
-//  LOGIN / LOGOUT / SESSION
+//  LOGIN / LOGOUT
 // ══════════════════════════════════════════
 g('inp-p').onkeydown=e=>{if(e.key==='Enter')doLogin()};
 g('inp-u').onkeydown=e=>{if(e.key==='Enter')g('inp-p').focus()};
@@ -438,6 +449,8 @@ async function doLogin(){
   const u=g('inp-u').value.trim(), p=g('inp-p').value.trim();
   g('lerr').textContent='';
 
+  // Try sheet accounts first if URL set
+  let acc=null;
   if(API_URL){
     try{
       const sheetAccs=await api({action:'getAccounts'});
@@ -446,22 +459,15 @@ async function doLogin(){
     }catch(e){}
   }
 
-  const acc=accounts.find(a=>a.u===u&&a.p===p);
+  acc=accounts.find(a=>a.u===u&&a.p===p);
   if(!acc){g('lerr').textContent='❌ Tài khoản hoặc mật khẩu không đúng!';return;}
 
   currentUser=acc;
-  saveLs(); // Lưu session
-  initAppUI();
-}
-
-async function initAppUI() {
-  if(!currentUser) return;
-  
   g('login-screen').style.display='none';
   const app=g('app');app.style.display='flex';app.style.flexDirection='column';
-  g('tuser').textContent='👤 '+currentUser.u+(currentUser.role==='admin'?' ★':'');
+  g('tuser').textContent='👤 '+u+(acc.role==='admin'?' ★':'');
 
-  const isAdmin=currentUser.role==='admin';
+  const isAdmin=acc.role==='admin';
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
 
   goTab('hv');
@@ -473,8 +479,9 @@ async function initAppUI() {
 
 function doLogout(){
   currentUser=null;selDK=null;selHV=null;hvRows=[];
-  saveLs(); // Xóa session
-  location.reload(); // Tải lại trang cho sạch
+  g('app').style.display='none';
+  g('login-screen').style.display='flex';
+  g('inp-u').value='';g('inp-p').value='';
 }
 
 // ══════════════════════════════════════════
@@ -528,8 +535,10 @@ function clearFlt(tab){
 function renderRows(tab,data){
   const tbody=g(tab+'-body');
   if(!data.length){
-    const msg=tab==='hv'?'Chưa có dữ liệu.':'Không có dữ liệu.';
-    tbody.innerHTML=`<tr><td colspan="16"><div class="tbl-empty"><div class="ico">📭</div><p>${msg}</p></div></td></tr>`;
+    const msg=tab==='hv'
+      ?'Chưa có dữ liệu. Sang tab <b>Danh sách đăng ký</b> → chọn dòng → bấm <b>📥 Lấy Thông Tin</b>.'
+      :'Không có dữ liệu hoặc tất cả đã được lấy thông tin.';
+    tbody.innerHTML=`<tr><td colspan="16"><div class="tbl-empty"><div class="ico">${tab==='hv'?'📭':'✅'}</div><p>${msg}</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML=data.map((r,i)=>`
@@ -548,12 +557,11 @@ function selRow(tab,i){
   const prev=tab==='dk'?selDK:selHV;
   if(prev!==null){const p=g(`${tab}-r${prev}`);if(p)p.classList.remove('sel');}
   if(tab==='dk'){selDK=i;}else{selHV=i;}
-  const rowEl = g(`${tab}-r${i}`);
-  if(rowEl) rowEl.classList.add('sel');
+  g(`${tab}-r${i}`).classList.add('sel');
   const r=tab==='dk'?dkFil[i]:hvFil[i];
   const bar=g(`${tab}-sel`);
   bar.className='sel-bar filled';
-  bar.innerHTML=`✅ Đang chọn: <b>${r.hoTen}</b> | ${r.monThi} - ${r.ngayThi}`;
+  bar.innerHTML=`✅ Đang chọn: <b>${r.hoTen}</b> &nbsp;|&nbsp; <b>${r.maHV}</b> &nbsp;|&nbsp; ${r.monThi} ${r.phienBan} – ${r.ngayThi} lúc ${r.gioThi}`;
   if(tab==='dk'){
     g('dk-btn-lay').disabled=false;
     g('dk-btn-xoa').disabled=false;
@@ -583,24 +591,33 @@ function resetSelHV(){
 //  DK ACTIONS
 // ══════════════════════════════════════════
 async function dkLayThongTin(){
-  if(selDK===null) return;
+  if(selDK===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
   const r=dkFil[selDK];
-  if(!r.dotThi||r.dotThi.includes('#N/A')){
-    toast('⚠️ Đợt thi lỗi!','warn');
+
+  // Req 5: nếu #N/A thì báo lỗi và ẩn khỏi DK
+  if(!r.dotThi||r.dotThi.includes('#N/A')||r.dotThi===''){
+    toast('⚠️ Đợt thi không tồn tại! Đang xóa dòng này khỏi danh sách…','warn');
     hideFromDK(r.maHV);
     return;
   }
+
+  // Save to HV sheet
   const u=currentUser.u;
   setSt('dk-st','⏳ Đang lưu…');
   try{
     if(API_URL){
       await api({action:'saveHVData',username:u,maHV:r.maHV,rowData:JSON.stringify(r)});
+      // Req 8: decrement slot
       await api({action:'decrementSlot',dotThi:r.dotThi,gioThi:r.gioThi});
     }
   }catch(e){}
+
+  // Add to local hvRows
   if(!hvRows.find(x=>x.maHV===r.maHV)) hvRows.push({...r});
+  // Hide from DK
   hideFromDK(r.maHV);
   filterHV();
+  setSt('hv-st',`📋 ${hvRows.length} học viên của bạn`);
   toast('📥 Đã lấy thông tin của '+r.hoTen,'ok');
   goTab('hv');
 }
@@ -615,16 +632,25 @@ function hideFromDK(maHV){
 }
 
 async function dkXoa(){
-  if(selDK===null) return;
+  if(selDK===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
   const r=dkFil[selDK];
-  if(!confirm(`Xóa "${r.hoTen}" khỏi danh sách?`)) return;
+  if(!confirm(`Xóa thông tin "${r.hoTen}" khỏi danh sách của bạn?`)) return;
+
   const u=currentUser.u;
+  // Remove from hvRows
   hvRows=hvRows.filter(x=>x.maHV!==r.maHV);
+  // Un-hide from DK
   if(hiddenMap[u]) hiddenMap[u].delete(r.maHV);
   saveLs();
-  if(API_URL){ try{ await api({action:'saveHVData',username:u,maHV:r.maHV,delete:'true'}); }catch(e){} }
+
+  // Delete from sheet
+  if(API_URL){
+    try{ await api({action:'saveHVData',username:u,maHV:r.maHV,delete:'true'}); }catch(e){}
+  }
+
   buildDKVisible();
   filterHV();
+  setSt('hv-st',`📋 ${hvRows.length} học viên của bạn`);
   toast('🗑️ Đã xóa '+r.hoTen,'ok');
 }
 
@@ -633,18 +659,20 @@ async function dkXoa(){
 // ══════════════════════════════════════════
 async function loadHV(){
   const u=currentUser?.u; if(!u) return;
+  // Try load from sheet
   if(API_URL){
     try{
       const data=await api({action:'getHVData',username:u});
       if(Array.isArray(data)&&data.length) hvRows=data;
     }catch(e){}
   }
+  // Merge hidden map from hvRows
   if(!hiddenMap[u]) hiddenMap[u]=new Set();
   hvRows.forEach(r=>hiddenMap[u].add(r.maHV));
   saveLs();
   buildDKVisible();
   filterHV();
-  setSt('hv-st',hvRows.length?`📋 ${hvRows.length} học viên`:'');
+  setSt('hv-st',hvRows.length?`📋 ${hvRows.length} học viên của bạn`:'');
 }
 
 function filterHV(){
@@ -660,7 +688,7 @@ function filterHV(){
 }
 
 function doInPhieu(){
-  if(selHV===null) return;
+  if(selHV===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
   const r=hvFil[selHV];
   currentPDFrow=r;
   buildPreview(r);
@@ -668,87 +696,375 @@ function doInPhieu(){
 }
 
 function doCopy(){
-  if(selHV===null) return;
+  if(selHV===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
   const r=hvFil[selHV];
+  // Req 7: only Họ tên, Môn thi, Phiên bản, Ngày thi, Giờ thi
   const msg=`Họ và tên: ${r.hoTen}\nMôn thi: ${r.monThi} ${r.phienBan}\nNgày thi: ${r.ngayThi} – ${r.gioThi}`;
-  navigator.clipboard.writeText(msg).then(()=>toast('📋 Đã copy!','ok'));
+  navigator.clipboard.writeText(msg)
+    .then(()=>toast('📋 Đã copy thông tin '+r.hoTen,'ok'))
+    .catch(()=>toast('⚠️ Copy thất bại – dùng Chrome/Edge','warn'));
 }
 
 // ══════════════════════════════════════════
-//  SCHEDULE / ACC / CONFIG (Tương tự code cũ)
+//  SCHEDULE
 // ══════════════════════════════════════════
 async function loadSchedule(){
-  setSt('lt-st','⏳...');
-  let data=MOCK_LICH;
-  if(API_URL){ try{data=await api({action:'getSchedule'});}catch(e){} }
+  setSt('lt-st','⏳ Đang tải lịch thi…');
+  let data=MOCK_LICH,ok=false;
+  if(API_URL){
+    try{data=await api({action:'getSchedule'});ok=true;}catch(e){}
+  }
   renderSchedule(data);
-  setSt('lt-st','✅ Lịch thi','ok');
+  setSt('lt-st',ok?'✅ Đã tải lịch thi':'🧪 Lịch mẫu'+(API_URL?' (lỗi kết nối)':''),ok?'ok':'');
 }
 
 function renderSchedule(d){
   const slots=d.slots||[],batches=d.batches||[];
+  if(!slots.length){g('sch-area').innerHTML='<p style="color:var(--g500);padding:16px">Không có dữ liệu lịch thi.</p>';return;}
+
   let html='<table class="sch-table"><thead><tr><th class="sch-corner"></th>';
-  batches.forEach(b=>html+=`<th class="sch-head-cell">${b.label}<div class="sch-head-date">${b.date}</div></th>`);
+  batches.forEach(b=>{
+    html+=`<th class="sch-head-cell">${b.label}<div class="sch-head-date">${b.date}</div></th>`;
+  });
   html+='</tr></thead><tbody>';
+
   slots.forEach((slot,si)=>{
     html+=`<tr><td class="sch-time-cell">${slot}</td>`;
     batches.forEach(b=>{
       const cnt=(b.counts||[])[si]||0;
-      html+=`<td class="sch-cell-wrap"><div class="${cnt>0?'sch-cell-on':'sch-cell-off'}">${cnt>0?cnt:''}</div></td>`;
+      if(cnt>0){
+        html+=`<td class="sch-cell-wrap"><div class="sch-cell-on">${cnt}</div></td>`;
+      } else {
+        html+=`<td class="sch-cell-wrap"><div class="sch-cell-off"></div></td>`;
+      }
     });
     html+='</tr>';
   });
-  g('sch-area').innerHTML=html+'</tbody></table>';
+  html+='</tbody></table>';
+  g('sch-area').innerHTML=html;
 }
 
+// ══════════════════════════════════════════
+//  ACCOUNTS
+// ══════════════════════════════════════════
 async function loadAccounts(){
-  if(API_URL){ try{const d=await api({action:'getAccounts'}); if(d.length){accounts=d;saveLs();}}catch(e){} }
+  setSt('acc-st','⏳ Đang tải…');
+  if(API_URL){
+    try{
+      const data=await api({action:'getAccounts'});
+      if(data.length){accounts=data;saveLs();}
+      setSt('acc-st',`✅ ${accounts.length} tài khoản`,'ok');
+    }catch(e){setSt('acc-st','⚠️ Dùng dữ liệu local','err');}
+  }
   renderAccTable();
 }
 
 function renderAccTable(){
-  g('acc-body').innerHTML=accounts.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a.u}</b></td><td>${a.role}</td><td><button onclick="accEdit(${i})">✏️</button></td></tr>`).join('');
+  g('acc-body').innerHTML=accounts.map((a,i)=>`
+    <tr><td>${i+1}</td><td><b>${a.u}</b></td>
+    <td><span class="badge ${a.role==='admin'?'by':'bn'}">${a.role}</span></td>
+    <td>
+      <button class="btn sec" style="padding:3px 9px;font-size:11px" onclick="accEdit(${i})">✏️ Sửa</button>
+      ${a.u!=='admin'?`<button class="btn danger" style="padding:3px 9px;font-size:11px;margin-left:4px" onclick="accDel(${i})">🗑️ Xóa</button>`:''}
+    </td></tr>`).join('');
 }
 
 async function accSave(){
-  const u=g('acc- u').value.trim(),p=g('acc-p').value.trim(),r=g('acc-r').value;
-  if(!u||!p) return;
-  accounts.push({u,p,role:r}); saveLs();
-  if(API_URL){ try{await api({action:'saveAccount',username:u,password:p,role:r});}catch(e){} }
+  const u=g('acc-u').value.trim(),p=g('acc-p').value.trim(),r=g('acc-r').value;
+  if(!u||!p){toast('⚠️ Nhập đủ tên và mật khẩu!','warn');return;}
+  const idx=accounts.findIndex(a=>a.u===u);
+  if(idx>=0) accounts[idx]={u,p,role:r};
+  else accounts.push({u,p,role:r});
+  saveLs();
+  // Sync to sheet
+  if(API_URL){
+    try{await api({action:'saveAccount',username:u,password:p,role:r});}
+    catch(e){toast('⚠️ Đã lưu local, lỗi sync sheet: '+e.message,'warn');}
+  }
   renderAccTable();
+  g('acc-u').value='';g('acc-p').value='';
+  toast('✅ Đã lưu tài khoản '+u,'ok');
 }
 
-function saveConfig(){ API_URL=g('cfg-url').value.trim(); saveLs(); toast('✅ Đã lưu!','ok'); }
+function accEdit(i){g('acc-u').value=accounts[i].u;g('acc-p').value=accounts[i].p;g('acc-r').value=accounts[i].role;}
 
-async function testConn(){
-  try{ const d=await api({action:'test'}); toast('✅ OK!','ok'); }catch(e){ toast('❌ Lỗi','err'); }
+async function accDel(i){
+  if(accounts[i].u==='admin'){toast('⚠️ Không thể xóa admin!','warn');return;}
+  if(!confirm(`Xóa tài khoản "${accounts[i].u}"?`)) return;
+  const u=accounts[i].u;
+  accounts.splice(i,1);saveLs();
+  if(API_URL){try{await api({action:'deleteAccount',username:u});}catch(e){}}
+  renderAccTable();
+  toast('🗑️ Đã xóa tài khoản '+u,'ok');
 }
-
-function useMock(){ allDK=[...MOCK_DK]; buildDKVisible(); goTab('dk'); }
 
 // ══════════════════════════════════════════
-//  PHIEU PREVIEW / PDF
+//  CONFIG
+// ══════════════════════════════════════════
+function saveConfig(){
+  API_URL=g('cfg-url').value.trim();
+  saveLs();
+  toast('✅ Đã lưu cấu hình!','ok');
+}
+async function testConn(){
+  if(!API_URL){toast('⚠️ Chưa nhập URL!','warn');return;}
+  toast('🔌 Đang test…');
+  try{
+    const d=await api({action:'test'});
+    toast('✅ Kết nối OK! Sheets: '+d.sheets,'ok');
+  }catch(e){toast('❌ Lỗi: '+e.message,'err');}
+}
+function useMock(){
+  allDK=[...MOCK_DK];buildDKVisible();
+  renderSchedule(MOCK_LICH);
+  toast('🧪 Đã tải dữ liệu mẫu');
+  goTab('dk');
+}
+
+// ══════════════════════════════════════════
+//  PHIEU PREVIEW
 // ══════════════════════════════════════════
 let currentPDFrow=null;
-function ch(str){ return String(str).replace(/[-:]/g,'').split('').map(c=>`<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1.5px solid #000;margin:1px">${c}</span>`).join(''); }
-function bx(txt,w='auto'){ return `<span style="display:inline-block;border:1.5px solid #000;padding:3px 8px;min-width:${w}">${txt}</span>`; }
 
-function buildPreview(r){
-  g('phieu-preview').innerHTML=`<div style="font-family:Arial;padding:10px"><b>PHIEU DANG KY: ${r.hoTen}</b><br>${bx(r.maHV)}</div>`;
+function ch(str){
+  return String(str).replace(/[-:]/g,'').split('').map(c=>
+    `<span style="display:inline-flex;align-items:center;justify-content:center;
+      width:24px;height:24px;border:1.5px solid #000;font-weight:700;font-size:11px;margin:1px">${c}</span>`
+  ).join('');
+}
+function bx(txt,w='auto'){
+  return `<span style="display:inline-block;border:1.5px solid #000;padding:3px 8px;
+    font-weight:600;font-size:11px;min-width:${w};white-space:nowrap">${txt}</span>`;
 }
 
-function genPDF(){ toast('PDF đang được tải...'); closeOv('phieu-ov'); }
+function buildPreview(r){
+  const today=new Date();
+  const dd=String(today.getDate()).padStart(2,'0'),
+        mm=String(today.getMonth()+1).padStart(2,'0'),
+        yy=today.getFullYear();
+  g('phieu-preview').innerHTML=`
+  <div style="font-family:Arial,sans-serif;font-size:12px;padding:6px;max-width:680px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:52px;height:52px;background:#1a4fa0;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+          <span style="color:#fff;font-size:20px;font-weight:900;font-style:italic;line-height:1;letter-spacing:-1px">MS</span>
+          <span style="color:rgba(255,255,255,.8);font-size:4.5px;text-align:center;margin-top:2px">TRUNG TÂM TIN HỌC THỰC HÀNH</span>
+        </div>
+        <b style="font-size:16px;letter-spacing:.3px">PHIẾU ĐĂNG KÝ DỰ THI MOS</b>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:900">
+          <span style="color:#1a4fa0">I</span><span style="color:#e53935">I</span><span style="color:#43a047">G</span>
+        </div>
+        <div style="font-size:8px;color:#555">IIG VIET NAM</div>
+      </div>
+      <div style="border:2px solid #000;padding:5px 12px;font-weight:700;font-size:12px">ĐỢT THI: ${v(r.dotThi)}</div>
+    </div>
+    <hr style="margin-bottom:10px"/>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Họ và tên:</b>${bx((r.hoTen||'').toUpperCase(),'200px')}
+      <b style="margin-left:10px">Mã HV:</b><span>${ch(v(r.maHV))}</span>
+    </div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <b>Số CCCD (còn hạn):</b><span>${ch(v(r.soCCCD))}</span>
+    </div>
+    <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Giới tính:</b>${bx(v(r.gioiTinh),'55px')}
+      <b style="margin-left:10px">Ngày sinh:</b><span>${ch(v(r.ngaySinh).replace(/-/g,''))}</span>
+    </div>
+    <div style="font-size:9px;color:#777;margin:0 0 8px 162px">dd/mm/yyyy</div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Số điện thoại:</b><span>${ch(v(r.soDT))}</span>
+    </div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Email:</b>${bx(v(r.email),'190px')}
+      <b style="margin-left:10px">Đã thi MOS:</b>${bx(v(r.daThi),'55px')}
+    </div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Môn thi:</b>${bx(v(r.monThi),'65px')}
+      <b style="margin-left:8px">Phiên bản:</b>${bx(v(r.phienBan),'50px')}
+      <b style="margin-left:8px">Ngôn ngữ:</b>${bx(v(r.ngonNgu),'85px')}
+    </div>
+    <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <b>Ngày thi:</b><span>${ch(v(r.ngayThi).replace(/-/g,''))}</span>
+      <b style="margin-left:14px">Giờ thi:</b><span>${ch(v(r.gioThi).replace(':',''))}</span>
+    </div>
+    <div style="font-size:9px;color:#777;margin:0 0 12px 70px">dd/mm/yyyy &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hh/mm</div>
+    <p style="margin-bottom:8px">Tôi cam kết đã hoàn thành đầy đủ các nội dung bên dưới:</p>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px">
+      <tr style="background:#eee">
+        <th style="border:1px solid #000;padding:5px;width:28px">STT</th>
+        <th style="border:1px solid #000;padding:5px">Nội dung cần thực hiện</th>
+        <th style="border:1px solid #000;padding:5px;width:55px">Đã thực hiện</th>
+        <th style="border:1px solid #000;padding:5px;width:60px">Ghi chú</th>
+      </tr>
+      ${['Đã đọc kỹ tài liệu Sổ tay (Handbook) & Hướng dẫn dự thi MOS 2016/2019. (Phần 1,2 sách luyện thi MOS)',
+         'Đã luyện xong các kỹ năng Core Skill Reviews trên GMetrix. (Phần 4 sách luyện thi MOS)',
+         'Đã luyện thi xong Practice Exams trên GMetrix. (Phần 5 sách luyện thi MOS)',
+         'Đã đọc kỹ & hiểu rõ <b>quy định hủy thi</b>. Cam kết chấp hành.',
+         'Thông tin tôi cung cấp là hoàn toàn chính xác. Tôi chịu mọi trách nhiệm.']
+        .map((t,i)=>`<tr><td style="border:1px solid #000;padding:4px;text-align:center">${i+1}</td>
+          <td style="border:1px solid #000;padding:4px 6px">${t}</td>
+          <td style="border:1px solid #000;padding:4px;text-align:center">☐</td>
+          <td style="border:1px solid #000"></td></tr>`).join('')}
+    </table>
+    <b style="font-size:12px;text-decoration:underline">QUI ĐỊNH HỦY THI</b>
+    <ul style="font-size:11px;margin:6px 0 10px 16px;line-height:1.65">
+      <li>Hủy thi: phải báo trung tâm trước 10 ngày.</li>
+      <li>Hủy thi khẩn cấp: cần có giấy tờ chứng minh (ốm đau, tai nạn…). IIG sẽ xem xét hoàn phí.</li>
+      <li>Các trường hợp khác không có lý do chính đáng: mất lệ phí thi.</li>
+    </ul>
+    <div style="text-align:right;font-style:italic;font-size:11px;margin-bottom:10px">TP. Hồ Chí Minh, ngày ${dd} tháng ${mm} năm ${yy}</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px">
+      <div style="text-align:center;width:47%"><b>GV NHẬN ĐĂNG KÝ</b><br><span style="font-size:10px;font-weight:400">(Ký, ghi rõ họ tên)</span></div>
+      <div style="text-align:center;width:47%"><b>HỌC VIÊN ĐĂNG KÝ</b><br><span style="font-size:10px;font-weight:400">(Ký, ghi rõ họ tên)</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <div style="border:1px solid #000;width:47%;height:65px"></div>
+      <div style="border:1px solid #000;width:47%;height:65px"></div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  PDF (jsPDF)
+// ══════════════════════════════════════════
+function genPDF(){
+  const r=currentPDFrow; if(!r){toast('⚠️ Không có dữ liệu','warn');return;}
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    const W=210,ML=18,MR=18,PW=210-ML-MR;
+    const today=new Date();
+    const dd=String(today.getDate()).padStart(2,'0'),
+          mm=String(today.getMonth()+1).padStart(2,'0'),
+          yy=today.getFullYear();
+
+    function sf(sz,st='normal'){doc.setFontSize(sz);doc.setFont('helvetica',st);}
+    function cellRow(x,y,str,cw=6,ch=6.2){
+      String(str).replace(/[-:]/g,'').split('').forEach((c,i)=>{
+        const cx=x+i*(cw+0.5);
+        doc.rect(cx,y,cw,ch);
+        sf(9,'bold');doc.text(c,cx+cw/2,y+ch-1.3,{align:'center'});
+      });
+    }
+    function field(x,y,txt,w,h=6.2){
+      doc.rect(x,y,w,h);sf(9,'bold');doc.text(String(txt),x+2,y+h-1.5,{maxWidth:w-3});
+    }
+
+    let y=14;
+    // ĐỢT THI
+    sf(9,'bold');doc.rect(W-MR-34,y-5,34,7);
+    doc.text('DOT THI: '+v(r.dotThi),W-MR-17,y-0.5,{align:'center'});
+
+    // MS
+    doc.setFillColor(26,79,160);doc.rect(ML,y-5,17,17,'F');
+    doc.setTextColor(255,255,255);sf(13,'bolditalic');
+    doc.text('MS',ML+8.5,y+3.5,{align:'center'});
+    doc.setFontSize(4);doc.text('TRUNG TAM',ML+8.5,y+7,{align:'center'});
+    doc.setTextColor(0,0,0);
+
+    // TITLE
+    sf(15,'bold');doc.text('PHIEU DANG KY DU THI MOS',W/2,y+4,{align:'center'});
+
+    // IIG
+    sf(13,'bold');
+    doc.setTextColor(26,79,160);doc.text('I',W-MR-20,y+3);
+    doc.setTextColor(229,57,53);doc.text('I',W-MR-14,y+3);
+    doc.setTextColor(67,160,71);doc.text('G',W-MR-8,y+3);
+    doc.setTextColor(0,0,0);sf(6,'normal');
+    doc.text('IIG VIET NAM',W-MR-20,y+8);
+
+    y+=17;doc.line(ML,y,W-MR,y);y+=6;
+
+    sf(9,'normal');doc.text('Ho va ten:',ML,y);
+    field(ML+20,y-5,(r.hoTen||'').toUpperCase(),82);
+    doc.text('Ma HV:',ML+106,y);
+    cellRow(ML+120,y-5,v(r.maHV));y+=9;
+
+    doc.text('So CCCD (con han):',ML,y);
+    cellRow(ML+39,y-5,v(r.soCCCD));y+=9;
+
+    doc.text('Gioi tinh:',ML,y);
+    field(ML+20,y-5,v(r.gioiTinh),20);
+    doc.text('Ngay sinh:',ML+45,y);
+    cellRow(ML+64,y-5,v(r.ngaySinh).replace(/-/g,''));
+    sf(7,'normal');doc.text('dd/mm/yyyy',ML+64,y+3.5);y+=11;
+
+    sf(9,'normal');doc.text('So dien thoai:',ML,y);
+    cellRow(ML+31,y-5,v(r.soDT));y+=9;
+
+    doc.text('Email:',ML,y);field(ML+13,y-5,v(r.email),82);
+    doc.text('Da thi MOS:',ML+99,y);field(ML+120,y-5,v(r.daThi),22);y+=9;
+
+    doc.text('Mon thi:',ML,y);field(ML+17,y-5,v(r.monThi),25);
+    doc.text('Phien ban:',ML+46,y);field(ML+63,y-5,v(r.phienBan),18);
+    doc.text('Ngon ngu:',ML+85,y);field(ML+101,y-5,v(r.ngonNgu),34);y+=9;
+
+    doc.text('Ngay thi:',ML,y);
+    cellRow(ML+19,y-5,v(r.ngayThi).replace(/-/g,''));
+    sf(7,'normal');doc.text('dd/mm/yyyy',ML+19,y+3.5);
+    sf(9,'normal');doc.text('Gio thi:',ML+77,y);
+    cellRow(ML+90,y-5,v(r.gioThi).replace(':',''));
+    sf(7,'normal');doc.text('hh/mm',ML+90,y+3.5);y+=12;
+
+    sf(9,'normal');doc.text('Toi cam ket da hoan thanh day du cac noi dung ben duoi:',ML,y);y+=4;
+
+    // Cam kết table
+    const hdr=['STT','Noi dung can thuc hien','Da thuc hien','Ghi chu'];
+    const cw=[9,108,18,19];
+    const rows2=[
+      ['1','Da doc ky tai lieu So tay & Huong dan du thi MOS 2016/2019. (Phan 1,2 sach luyen thi MOS)'],
+      ['2','Da luyen xong Core Skill Reviews tren GMetrix. (Phan 4 sach luyen thi MOS)'],
+      ['3','Da luyen thi xong Practice Exams tren GMetrix. (Phan 5 sach luyen thi MOS)'],
+      ['4','Da doc ky & hieu ro quy dinh huy thi. Cam ket chap hanh.'],
+      ['5','Thong tin toi cung cap la hoan toan chinh xac. Toi chiu moi trach nhiem.'],
+    ];
+    doc.setFillColor(220,220,220);
+    let tx=ML;
+    cw.forEach((w,i)=>{doc.rect(tx,y,w,6,'FD');sf(7,'bold');
+      doc.text(hdr[i],tx+w/2,y+4,{align:'center',maxWidth:w-1});tx+=w;});
+    y+=6;
+    rows2.forEach(row=>{
+      const lines=doc.splitTextToSize(row[1],cw[1]-3);
+      const rh=Math.max(6,lines.length*4+3);
+      tx=ML;cw.forEach((w,i)=>{doc.rect(tx,y,w,rh);
+        sf(7,'normal');
+        if(i===0||i===2||i===3) doc.text(i===2?'[ ]':(row[i]||''),tx+w/2,y+rh/2+1,{align:'center'});
+        else doc.text(lines,tx+1.5,y+4.5);
+        tx+=w;});
+      y+=rh;
+    });y+=4;
+
+    sf(9,'bold');doc.text('QUI DINH HUY THI',ML,y);
+    doc.line(ML,y+1,ML+42,y+1);y+=6;sf(8,'normal');
+    ['• Huy thi: bao truoc 10 ngay.',
+     '• Huy thi khan cap: can giay to chung minh. IIG xem xet hoan phi.',
+     '• Truong hop khac khong co ly do: mat le phi thi.']
+    .forEach(s=>{const ls=doc.splitTextToSize(s,PW-4);doc.text(ls,ML+2,y);y+=ls.length*4.5+1;});
+    y+=3;
+
+    sf(9,'italic');doc.text(`TP. Ho Chi Minh, ngay ${dd} thang ${mm} nam ${yy}`,W-MR,y,{align:'right'});y+=7;
+    sf(9,'bold');
+    doc.text('GV NHAN DANG KY',ML+20,y,{align:'center'});
+    doc.text('HOC VIEN DANG KY',ML+PW/2+20,y,{align:'center'});
+    y+=4;sf(8,'normal');
+    doc.text('(Ky, ghi ro ho ten)',ML+20,y,{align:'center'});
+    doc.text('(Ky, ghi ro ho ten)',ML+PW/2+20,y,{align:'center'});
+    y+=2;
+    doc.rect(ML,y,PW/2-3,24);doc.rect(ML+PW/2+3,y,PW/2-3,24);
+
+    doc.save(`phieu_${(r.maHV||'hv')}.pdf`);
+    toast('✅ Đã tải PDF!','ok');
+    closeOv('phieu-ov');
+  }catch(e){toast('❌ Lỗi PDF: '+e.message,'err');console.error(e);}
+}
 
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
 loadLs();
 renderSchedule(MOCK_LICH);
-
-// Kiểm tra nếu đã có session thì vào thẳng App
-if (currentUser) {
-  initAppUI();
-}
 </script>
 </body>
 </html>
