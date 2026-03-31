@@ -676,24 +676,29 @@ function hideRow(maHV){
 async function dkXoa(){
   if(selDK===null){toast('⚠️ Chọn một dòng trước!','warn');return;}
   const r=dkFil[selDK];
-  if(!confirm(`Xóa thông tin "${r.hoTen}" (${r.maHV}) và trả lại danh sách?`)) return;
+  const maHV=r.maHV, hoTen=r.hoTen;
+  const wasInHV=hvRows.some(x=>x.maHV===maHV);
 
-  const u=currentUser.u;
-  // Fix #6: xóa từ DaLayThongTin thay vì HVData
-  if(API_URL){
-    try{ await api({action:'xoaThongTin',maHV:r.maHV}); }
-    catch(e){ toast('⚠️ Lỗi xóa sheet: '+e.message,'warn'); }
+  // ── Cập nhật UI ngay lập tức ──
+  globalHidden.add(maHV);
+  buildDKVisible();
+  resetSelDK();
+
+  if(wasInHV){
+    hvRows=hvRows.filter(x=>x.maHV!==maHV);
+    filterHV();
+    setSt('hv-st',hvRows.length?`📋 ${hvRows.length} học viên`:'');
   }
 
-  // Fix #4: xóa khỏi globalHidden → dòng hiện lại trong DK
-  globalHidden.delete(r.maHV);
-  // Xóa khỏi hvRows của user hiện tại
-  hvRows=hvRows.filter(x=>x.maHV!==r.maHV);
-  // Fix #4: rebuild ngay để dòng xuất hiện lại
-  buildDKVisible();
-  filterHV();
-  setSt('hv-st',hvRows.length?`📋 ${hvRows.length} học viên`:'');
-  toast('🗑️ Đã xóa và trả '+r.hoTen+' về danh sách','ok');
+  toast('🗑️ Đã xóa '+hoTen+' khỏi danh sách','ok');
+
+  // ── Đồng bộ sheet ngầm ──
+  if(API_URL){
+    try{
+      if(wasInHV) await api({action:'xoaThongTin',maHV});
+      await api({action:'layThongTin',maHV,username:'__xoa__',rowData:'{}'});
+    }catch(e){}
+  }
 }
 
 // ═══════════════════════════════════════════
