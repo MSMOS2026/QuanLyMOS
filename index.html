@@ -17,11 +17,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g100);color:var(--black);min-height:100vh;font-size:14px}
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-}
+
 /* LOGIN */
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%)}
@@ -57,21 +53,9 @@ html, body {
 .btn-login.loading .spinner{display:block}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 
-.login-overlay{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  display:none;
-  z-index:999;
+.login-overlay{display:none;position:fixed;inset:0;z-index:999;
   background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%);
-  align-items:center;
-  justify-content:center;
-}
-/* .login-overlay{display:none;position:fixed;inset:0;z-index:999;
-  background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%);
-  flex-direction:column;align-items:center;justify-content:center;gap:20px} */
+  flex-direction:column;align-items:center;justify-content:center;gap:20px}
 .login-overlay.show{display:flex}
 .login-overlay .lo-card{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);
   border-radius:16px;padding:32px 40px;display:flex;flex-direction:column;
@@ -546,14 +530,11 @@ async function enterApp(acc){
   saveLs();
 
   // Ẩn login, hiện overlay TRƯỚC khi làm gì khác
-  ov.classList.add('show');
-  await nextFrame();
   g('login-screen').style.display='none';
-  /* g('login-screen').style.display='none';
   const ov=g('login-overlay');
   ov.classList.add('show');
   // Bắt buộc browser render overlay trước
-  await nextFrame(); */
+  await nextFrame();
   await wait(80);
 
   const isAdmin=acc.role==='admin';
