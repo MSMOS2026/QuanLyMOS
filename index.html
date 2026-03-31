@@ -43,6 +43,28 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g100);color:var(--
 .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,105,92,.35)}
 .login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
 
+/* LOADING */
+.btn-login.loading{opacity:.8;pointer-events:none;position:relative}
+.btn-login.loading .btn-text{opacity:0}
+.btn-login .spinner{display:none;position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:20px;height:20px;
+  border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite}
+.btn-login.loading .spinner{display:block}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.login-overlay{display:none;position:fixed;inset:0;z-index:999;
+  background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%);
+  flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.login-overlay.show{display:flex}
+.login-overlay .lo-card{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);
+  border-radius:16px;padding:32px 40px;display:flex;flex-direction:column;
+  align-items:center;gap:16px;border:1px solid rgba(255,255,255,.2)}
+.login-overlay .lo-ring{width:48px;height:48px;border:4px solid rgba(255,255,255,.25);
+  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.login-overlay .lo-text{color:#fff;font-size:15px;font-weight:600;letter-spacing:.5px}
+.login-overlay .lo-sub{color:rgba(255,255,255,.7);font-size:12px;text-align:center}
+
 /* APP */
 #app{display:none;min-height:100vh;flex-direction:column}
 .topbar{height:52px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;
@@ -198,8 +220,20 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
       <input id="inp-u" type="text" placeholder="Nhập tài khoản…" autocomplete="username"/></div>
     <div class="fg"><label>Mật Khẩu</label>
       <input id="inp-p" type="password" placeholder="Nhập mật khẩu…" autocomplete="current-password"/></div>
-    <button class="btn-login" onclick="doLogin()">Đăng Nhập</button>
+    <button class="btn-login" id="btn-login-el" onclick="doLogin()">
+      <span class="btn-text">Đăng Nhập</span>
+      <span class="spinner"></span>
+    </button>
     <div class="login-err" id="lerr"></div>
+  </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div class="login-overlay" id="login-overlay">
+  <div class="lo-card">
+    <div class="lo-ring"></div>
+    <div class="lo-text" id="lo-text">Đang đăng nhập…</div>
+    <div class="lo-sub" id="lo-sub">Đang tải dữ liệu từ Google Sheets</div>
   </div>
 </div>
 
@@ -440,12 +474,17 @@ g('inp-u').onkeydown=e=>{if(e.key==='Enter')g('inp-p').focus()};
 
 async function tryRestoreSession(session){
   if(!session) return false;
-  // thử load tài khoản từ sheet trước
+  // Show loading while restoring
+  const ov=g('login-overlay'); ov.classList.add('show');
+  setLoading('Đang khôi phục phiên…','Vui lòng chờ');
   if(API_URL){
     try{ const sa=await api({action:'getAccounts'}); if(sa.length){accounts=sa;} }catch(e){}
   }
   const acc=accounts.find(a=>a.u===session.u&&a.p===session.p);
-  if(!acc) return false;
+  if(!acc){
+    ov.classList.remove('show');
+    return false;
+  }
   await enterApp(acc);
   return true;
 }
@@ -453,29 +492,64 @@ async function tryRestoreSession(session){
 async function doLogin(){
   const u=g('inp-u').value.trim(), p=g('inp-p').value.trim();
   g('lerr').textContent='';
+
+  // Show button loading state
+  const btnEl=g('btn-login-el');
+  btnEl.classList.add('loading');
+
   if(API_URL){
     try{ const sa=await api({action:'getAccounts'}); if(sa.length){accounts=sa;} }catch(e){}
   }
   const acc=accounts.find(a=>a.u===u&&a.p===p);
-  if(!acc){g('lerr').textContent='❌ Tài khoản hoặc mật khẩu không đúng!';return;}
+  if(!acc){
+    btnEl.classList.remove('loading');
+    g('lerr').textContent='❌ Tài khoản hoặc mật khẩu không đúng!';
+    return;
+  }
   await enterApp(acc);
+}
+
+function setLoading(text, sub=''){
+  g('lo-text').textContent=text;
+  g('lo-sub').textContent=sub;
 }
 
 async function enterApp(acc){
   currentUser=acc;
-  saveLs();  // lưu session
+  saveLs();
+
+  // Show full-screen loading overlay
   g('login-screen').style.display='none';
-  const app=g('app');app.style.display='flex';app.style.flexDirection='column';
-  g('tuser').textContent='👤 '+acc.u+(acc.role==='admin'?' ★':'');
+  const ov=g('login-overlay'); ov.classList.add('show');
+
+  setLoading('Đang xác thực…','Vui lòng chờ trong giây lát');
+  await new Promise(r=>setTimeout(r,300)); // small pause for smooth feel
+
   const isAdmin=acc.role==='admin';
+
+  setLoading('Đang tải lịch thi…','Đồng bộ dữ liệu từ Google Sheets');
+  await loadSchedule(true);
+
+  setLoading('Đang kiểm tra danh sách…','Lấy trạng thái đã xử lý');
+  await loadGlobalHidden();
+
+  setLoading('Đang tải danh sách đăng ký…',`Xin chào, ${acc.u}!`);
+  await loadDK();
+
+  if(isAdmin){
+    setLoading('Đang tải tài khoản…','');
+    await loadAccounts();
+  }
+
+  setLoading('Đang tải thông tin học viên…','Sắp xong rồi…');
+  await loadHV();
+
+  // Hide overlay, show app
+  ov.classList.remove('show');
+  const app=g('app');app.style.display='flex';app.style.flexDirection='column';
+  g('tuser').textContent='👤 '+acc.u+(isAdmin?' ★':'');
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
   goTab('hv');
-  // Fix #5: load lịch thi tự động khi đăng nhập để có dữ liệu kiểm tra slot
-  await loadSchedule(true);  // silent=true
-  await loadGlobalHidden();
-  await loadDK();
-  if(isAdmin) await loadAccounts();
-  await loadHV();
 }
 
 function doLogout(){
