@@ -474,9 +474,13 @@ g('inp-u').onkeydown=e=>{if(e.key==='Enter')g('inp-p').focus()};
 
 async function tryRestoreSession(session){
   if(!session) return false;
-  // Show loading while restoring
-  const ov=g('login-overlay'); ov.classList.add('show');
+  // Show loading overlay immediately
+  const ov=g('login-overlay');
+  ov.classList.add('show');
+  await nextFrame();
+  await wait(50);
   setLoading('Đang khôi phục phiên…','Vui lòng chờ');
+  await nextFrame();
   if(API_URL){
     try{ const sa=await api({action:'getAccounts'}); if(sa.length){accounts=sa;} }catch(e){}
   }
@@ -493,9 +497,10 @@ async function doLogin(){
   const u=g('inp-u').value.trim(), p=g('inp-p').value.trim();
   g('lerr').textContent='';
 
-  // Show button loading state
+  // Show spinner on button
   const btnEl=g('btn-login-el');
   btnEl.classList.add('loading');
+  await nextFrame();
 
   if(API_URL){
     try{ const sa=await api({action:'getAccounts'}); if(sa.length){accounts=sa;} }catch(e){}
@@ -506,6 +511,8 @@ async function doLogin(){
     g('lerr').textContent='❌ Tài khoản hoặc mật khẩu không đúng!';
     return;
   }
+  // enterApp sẽ tự ẩn login-screen và hiện overlay
+  btnEl.classList.remove('loading');
   await enterApp(acc);
 }
 
@@ -514,39 +521,59 @@ function setLoading(text, sub=''){
   g('lo-sub').textContent=sub;
 }
 
+// Đảm bảo browser render xong 1 frame trước khi tiếp tục
+function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0))); }
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
 async function enterApp(acc){
   currentUser=acc;
   saveLs();
 
-  // Show full-screen loading overlay
+  // Ẩn login, hiện overlay TRƯỚC khi làm gì khác
   g('login-screen').style.display='none';
-  const ov=g('login-overlay'); ov.classList.add('show');
-
-  setLoading('Đang xác thực…','Vui lòng chờ trong giây lát');
-  await new Promise(r=>setTimeout(r,300)); // small pause for smooth feel
+  const ov=g('login-overlay');
+  ov.classList.add('show');
+  // Bắt buộc browser render overlay trước
+  await nextFrame();
+  await wait(80);
 
   const isAdmin=acc.role==='admin';
 
+  setLoading('Đang xác thực…','Xin chào, '+acc.u+'!');
+  await nextFrame();
+  await wait(400);
+
   setLoading('Đang tải lịch thi…','Đồng bộ dữ liệu từ Google Sheets');
+  await nextFrame();
   await loadSchedule(true);
 
   setLoading('Đang kiểm tra danh sách…','Lấy trạng thái đã xử lý');
+  await nextFrame();
   await loadGlobalHidden();
 
-  setLoading('Đang tải danh sách đăng ký…',`Xin chào, ${acc.u}!`);
+  setLoading('Đang tải danh sách đăng ký…','Vui lòng chờ…');
+  await nextFrame();
   await loadDK();
 
   if(isAdmin){
     setLoading('Đang tải tài khoản…','');
+    await nextFrame();
     await loadAccounts();
   }
 
   setLoading('Đang tải thông tin học viên…','Sắp xong rồi…');
+  await nextFrame();
   await loadHV();
 
-  // Hide overlay, show app
+  // Ẩn overlay, hiện app
+  setLoading('Hoàn tất!','');
+  await wait(300);
   ov.classList.remove('show');
-  const app=g('app');app.style.display='flex';app.style.flexDirection='column';
+  await nextFrame();
+
+  const app=g('app');
+  app.style.display='flex';
+  app.style.flexDirection='column';
   g('tuser').textContent='👤 '+acc.u+(isAdmin?' ★':'');
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin?'':'none');
   goTab('hv');
