@@ -55,15 +55,35 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g100);color:var(--
 
 .login-overlay{display:none;position:fixed;inset:0;z-index:999;
   background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%);
-  flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  align-items:center;justify-content:center}
 .login-overlay.show{display:flex}
-.login-overlay .lo-card{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);
-  border-radius:16px;padding:32px 40px;display:flex;flex-direction:column;
-  align-items:center;gap:16px;border:1px solid rgba(255,255,255,.2)}
-.login-overlay .lo-ring{width:48px;height:48px;border:4px solid rgba(255,255,255,.25);
-  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
-.login-overlay .lo-text{color:#fff;font-size:15px;font-weight:600;letter-spacing:.5px}
-.login-overlay .lo-sub{color:rgba(255,255,255,.7);font-size:12px;text-align:center}
+.login-overlay .lo-card{
+  background:rgba(255,255,255,.12);backdrop-filter:blur(10px);
+  border-radius:16px;padding:36px 48px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;border:1px solid rgba(255,255,255,.2);
+  width:300px;          /* fixed width – không nhảy ngang */
+  min-height:160px;     /* fixed height – không nhảy dọc */
+  box-sizing:border-box;
+  position:absolute;    /* tách khỏi flow, canh giữa tuyệt đối */
+  top:50%;left:50%;
+  transform:translate(-50%,-50%)}
+.login-overlay .lo-ring{
+  width:52px;height:52px;
+  border:4px solid rgba(255,255,255,.25);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  flex-shrink:0}
+.login-overlay .lo-text{
+  color:#fff;font-size:15px;font-weight:600;
+  letter-spacing:.3px;text-align:center;
+  width:100%;           /* full width để text không dịch */
+  min-height:22px}
+.login-overlay .lo-sub{
+  color:rgba(255,255,255,.7);font-size:12px;
+  text-align:center;width:100%;
+  min-height:18px}
 
 /* APP */
 #app{display:none;min-height:100vh;flex-direction:column}
