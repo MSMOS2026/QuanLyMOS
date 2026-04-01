@@ -53,37 +53,49 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g100);color:var(--
 .btn-login.loading .spinner{display:block}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 
-.login-overlay{display:none;position:fixed;inset:0;z-index:999;
-  background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%);
-  align-items:center;justify-content:center}
-.login-overlay.show{display:flex}
+.login-overlay{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:linear-gradient(135deg,#004D40 0%,#00796B 55%,#4DB6AC 100%)}
+.login-overlay.show{display:flex;align-items:center;justify-content:center}
 .login-overlay .lo-card{
-  background:rgba(255,255,255,.12);backdrop-filter:blur(10px);
-  border-radius:16px;padding:36px 48px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;border:1px solid rgba(255,255,255,.2);
-  width:300px;          /* fixed width – không nhảy ngang */
-  min-height:160px;     /* fixed height – không nhảy dọc */
-  box-sizing:border-box;
-  position:absolute;    /* tách khỏi flow, canh giữa tuyệt đối */
-  top:50%;left:50%;
-  transform:translate(-50%,-50%)}
+  background:rgba(255,255,255,.13);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:40px 48px;
+  display:flex;flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:18px;
+  border:1px solid rgba(255,255,255,.22);
+  width:270px;
+  min-height:190px;
+  box-sizing:border-box}
+.login-overlay .lo-spinner-wrap{
+  width:64px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin:0 auto}
 .login-overlay .lo-ring{
   width:52px;height:52px;
-  border:4px solid rgba(255,255,255,.25);
+  border:4.5px solid rgba(255,255,255,.2);
   border-top-color:#fff;
+  border-right-color:rgba(255,255,255,.55);
   border-radius:50%;
-  animation:spin .8s linear infinite;
-  flex-shrink:0}
+  animation:spin .8s linear infinite}
 .login-overlay .lo-text{
-  color:#fff;font-size:15px;font-weight:600;
-  letter-spacing:.3px;text-align:center;
-  width:100%;           /* full width để text không dịch */
-  min-height:22px}
+  color:#fff;
+  font-size:14px;font-weight:700;
+  text-align:center;
+  width:100%;
+  min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1.5}
 .login-overlay .lo-sub{
-  color:rgba(255,255,255,.7);font-size:12px;
-  text-align:center;width:100%;
-  min-height:18px}
+  color:rgba(255,255,255,.65);
+  font-size:11.5px;
+  text-align:center;
+  width:100%;
+  min-height:17px}
 
 /* APP */
 #app{display:none;min-height:100vh;flex-direction:column}
@@ -251,7 +263,7 @@ tbody td{padding:9px 11px;white-space:nowrap;color:var(--g700)}
 <!-- LOADING OVERLAY -->
 <div class="login-overlay" id="login-overlay">
   <div class="lo-card">
-    <div class="lo-ring"></div>
+    <div class="lo-spinner-wrap"><div class="lo-ring"></div></div>
     <div class="lo-text" id="lo-text">Đang đăng nhập…</div>
     <div class="lo-sub" id="lo-sub">Đang tải dữ liệu từ Google Sheets</div>
   </div>
