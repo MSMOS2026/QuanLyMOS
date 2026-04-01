@@ -667,7 +667,7 @@ function buildDKVisible(){
   shownDK=allDK.filter(r=>!globalHidden.has(r.maHV));
   // Fix #3: số hiển thị = shownDK.length, không phải allDK.length
   if(allDK.length>0){
-    setSt('dk-st',`✅ Hiển thị ${shownDK.length} / ${allDK.length} bản ghi`,'ok');
+    setSt('dk-st',`✅ Hiển thị ${shownDK.length} bản ghi`,'ok');
   }
   filterDK();
 }
